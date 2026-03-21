@@ -4,7 +4,7 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-78%25-yellowgreen)](https://github.com/quantsingularity/AlphaMind/tree/main/tests)
 [![License](https://img.shields.io/github/license/quantsingularity/AlphaMind)](https://github.com/quantsingularity/AlphaMind/blob/main/LICENSE)
 
-## 🧠 Institutional-Grade Quantitative AI Trading System
+## Institutional-Grade Quantitative AI Trading System
 
 AlphaMind is an advanced quantitative trading system that combines alternative data sources, machine learning algorithms, and high-frequency execution strategies to deliver institutional-grade trading performance.
 
