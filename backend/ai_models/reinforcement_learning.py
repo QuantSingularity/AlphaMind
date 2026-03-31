@@ -1,10 +1,10 @@
+import logging
 from typing import Any, Dict, Optional
 
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 from stable_baselines3 import PPO
-import logging
 
 logging.basicConfig(
     level=logging.INFO,

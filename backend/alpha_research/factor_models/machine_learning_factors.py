@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict
 
 import numpy as np
@@ -6,7 +7,6 @@ import tensorflow as tf
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LassoCV
 from sklearn.preprocessing import RobustScaler
-import logging
 
 logging.basicConfig(
     level=logging.INFO,

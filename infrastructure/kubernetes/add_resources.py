@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import yaml
 from pathlib import Path
+
+import yaml
 
 
 def add_resources_to_deployment(file_path):

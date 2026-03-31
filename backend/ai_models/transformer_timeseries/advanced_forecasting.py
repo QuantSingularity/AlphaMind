@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 
 import keras
@@ -5,7 +6,6 @@ import numpy as np
 import tensorflow as tf
 
 from backend.ai_models.attention_mechanism import FinancialTimeSeriesTransformer
-import logging
 
 logging.basicConfig(
     level=logging.INFO,

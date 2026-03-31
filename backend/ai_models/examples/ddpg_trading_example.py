@@ -4,6 +4,7 @@
 ## and backtest the trained agent on market data.
 """
 
+import logging
 import os
 import sys
 from typing import Any, Dict
@@ -11,7 +12,6 @@ from typing import Any, Dict
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import logging
 
 logging.basicConfig(
     level=logging.INFO,

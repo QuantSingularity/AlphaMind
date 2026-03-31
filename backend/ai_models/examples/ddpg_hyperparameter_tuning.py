@@ -4,6 +4,7 @@
 ## hyperparameters for the DDPG agent in various market conditions.
 """
 
+import logging
 import os
 import sys
 from typing import Any, Dict, List, Optional
@@ -11,7 +12,6 @@ from typing import Any, Dict, List, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import logging
 
 logging.basicConfig(
     level=logging.INFO,

@@ -14,7 +14,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from gym import spaces
-import logging
 
 logging.basicConfig(
     level=logging.INFO,

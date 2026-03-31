@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List, Optional
 
 import matplotlib.pyplot as plt
@@ -8,7 +9,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.layers import LSTM, BatchNormalization, Dense, Dropout, Input
 from tensorflow.keras.models import Model
-import logging
 
 logging.basicConfig(
     level=logging.INFO,
