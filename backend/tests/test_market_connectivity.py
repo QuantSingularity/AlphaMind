@@ -13,7 +13,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-from order_management.market_connectivity import (
+from execution_engine.order_management.market_connectivity import (
     ConnectionStatus,
     FailureMode,
     MarketConnectivityManager,

@@ -1,5 +1,3 @@
-from typing import Any
-
 """
 Unit tests for the real-time risk monitoring module.
 
@@ -9,8 +7,9 @@ This module contains tests for the real-time risk monitoring functionality.
 import time
 import unittest
 from datetime import datetime
+from typing import Any
 
-from backend.risk_system.risk_aggregation.real_time_monitoring import (
+from risk_system.risk_aggregation.real_time_monitoring import (
     AlertChannel,
     AlertSeverity,
     RiskAlert,

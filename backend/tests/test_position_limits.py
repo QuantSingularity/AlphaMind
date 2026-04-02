@@ -1,5 +1,3 @@
-from typing import Any
-
 """
 Unit tests for the position limits management module.
 
@@ -7,8 +5,9 @@ This module contains tests for the position limits functionality.
 """
 
 import unittest
+from typing import Any
 
-from backend.risk_system.risk_aggregation.position_limits import (
+from risk_system.risk_aggregation.position_limits import (
     LimitScope,
     LimitType,
     PositionLimit,
