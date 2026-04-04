@@ -37,7 +37,7 @@ python-dateutil>=2.8.2
 pytz>=2024.0
 
 # Deep Learning (optional — install only if needed)
-# tensorflow>=2.14.0
+tensorflow>=2.15.0,<2.17.0
 # torch>=2.0.0
 # stable-baselines3>=2.0.0
 
