@@ -28,6 +28,12 @@ from execution_engine.order_management.reconnection_manager import (
 logger = logging.getLogger(__name__)
 
 
+class VenueType(Enum):
+    EXCHANGE = "exchange"
+    DARK_POOL = "dark_pool"
+    OTC = "otc"
+
+
 class FailureMode(Enum):
     """Types of simulated failures for testing."""
 

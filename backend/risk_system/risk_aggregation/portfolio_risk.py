@@ -79,7 +79,7 @@ class PositionRisk:
         self, returns: np.ndarray, confidence_level: float = 0.95
     ) -> float:
         """
-        Calculate Value at Risk for the position.
+        Calculate Value at Risk for the position (historical/discrete method).
 
         Args:
             returns: Historical returns
@@ -89,9 +89,14 @@ class PositionRisk:
             Value at Risk
         """
         try:
-            var = np.percentile(returns, 100 * (1 - confidence_level))
+            alpha = 100 * (1 - confidence_level)
+            try:
+                var = np.percentile(returns, alpha, method="lower")
+            except TypeError:
+                var = np.percentile(returns, alpha, interpolation="lower")
+
             self.risk_metrics["var"] = var
-            return var
+            return float(var)
         except Exception as e:
             logger.error(
                 f"Error calculating VaR for position {self.position_id}: {str(e)}"

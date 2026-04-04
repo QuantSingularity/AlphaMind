@@ -145,7 +145,10 @@ class TestSentimentBasedStrategy(unittest.TestCase):
                 "volume": np.random.uniform(1000000, 5000000, 100),
             }
         )
-        news_dates = np.random.choice(dates, size=50, replace=True)
+        # FIX: wrap np.random.choice result in pd.DatetimeIndex so each
+        # element is a pd.Timestamp (which supports .strftime), not a
+        # numpy.datetime64 (which does not).
+        news_dates = pd.DatetimeIndex(np.random.choice(dates, size=50, replace=True))
         news_texts = [
             f"Market news for {date.strftime('%Y-%m-%d')}: "
             + np.random.choice(
@@ -159,8 +162,8 @@ class TestSentimentBasedStrategy(unittest.TestCase):
             )
             for date in news_dates
         ]
-        string_dates = [date.strftime("%Y-%m-%d") for date in news_dates]
-        self.news_data = pd.DataFrame({"date": string_dates, "text": news_texts})
+        news_string_dates = [date.strftime("%Y-%m-%d") for date in news_dates]
+        self.news_data = pd.DataFrame({"date": news_string_dates, "text": news_texts})
         self.analyzer.prepare_tokenizer(self.news_data["text"])
         self.original_predict = self.analyzer.predict
         self.analyzer.predict = lambda texts: np.array(

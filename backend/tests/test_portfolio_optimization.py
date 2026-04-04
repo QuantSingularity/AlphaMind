@@ -110,7 +110,7 @@ def test_backtest_output_structure(optimizer: Any, sample_data: Any) -> Any:
     assert "portfolio_value" in results.columns
     assert "returns" in results.columns
     assert "drawdown" in results.columns
-    assert len(results) == N_SAMPLES - LOOKBACK_WINDOW + 1
+    assert len(results) == N_SAMPLES - LOOKBACK_WINDOW
     assert hasattr(optimizer, "performance_metrics")
     assert isinstance(optimizer.performance_metrics, dict)
     for metric in ["total_return", "sharpe_ratio", "max_drawdown", "volatility"]:

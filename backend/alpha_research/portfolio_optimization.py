@@ -29,7 +29,10 @@ class PortfolioOptimizer:
         self.n_assets = n_assets
         self.lookback_window = lookback_window
         self.hidden_units = hidden_units
-        self.scaler = StandardScaler()
+        self.price_scaler = StandardScaler()
+        self.vol_scaler = StandardScaler()
+        self.macro_scaler = StandardScaler()
+        self.scaler = self.price_scaler
         self.model = self._build_model()
         self.performance_metrics = {}
 
@@ -101,9 +104,9 @@ class PortfolioOptimizer:
         Returns:
             X_price, X_vol, X_macro, y (next period returns)
         """
-        price_scaled = self.scaler.fit_transform(price_data)
-        vol_scaled = self.scaler.fit_transform(volatility_data)
-        macro_scaled = self.scaler.fit_transform(macro_data)
+        price_scaled = self.price_scaler.fit_transform(price_data)
+        vol_scaled = self.vol_scaler.fit_transform(volatility_data)
+        macro_scaled = self.macro_scaler.fit_transform(macro_data)
         returns = price_data[1:] / price_data[:-1] - 1
         X_price, X_vol, X_macro, y = ([], [], [], [])
         for i in range(len(price_scaled) - self.lookback_window):
@@ -190,9 +193,10 @@ class PortfolioOptimizer:
         Returns:
             Optimal portfolio weights (n_assets,)
         """
-        price_scaled = self.scaler.transform(price_data)
-        volatility_scaled = self.scaler.transform(volatility_data)
-        macro_scaled = self.scaler.transform(macro_data)
+
+        price_scaled = self.price_scaler.fit_transform(price_data)
+        volatility_scaled = self.vol_scaler.fit_transform(volatility_data)
+        macro_scaled = self.macro_scaler.fit_transform(macro_data)
         price_scaled = np.array(price_scaled).reshape(
             1, self.lookback_window, self.n_assets
         )
@@ -231,16 +235,21 @@ class PortfolioOptimizer:
             DataFrame with backtest results and performance metrics
         """
         logger.info("\nStarting backtest (walk-forward simulation)...")
-        X_price, X_vol, X_macro, returns = self.preprocess_data(
-            price_data, volatility_data, macro_data
-        )
+
+        _, _, _, returns = self.preprocess_data(price_data, volatility_data, macro_data)
+        n_steps = len(returns)
         portfolio_value = [initial_capital]
         portfolio_weights = np.ones(self.n_assets) / self.n_assets
         drawdown_history = [0]
         portfolio_returns: List[Any] = []
-        for i in range(len(X_price)):
+
+        for i in range(n_steps):
+
+            raw_price = price_data[i : i + self.lookback_window]
+            raw_vol = volatility_data[i : i + self.lookback_window]
+            raw_macro = macro_data[i : i + self.lookback_window]
             optimal_weights = self.optimize_portfolio(
-                X_price[i], X_vol[i], X_macro[i], portfolio_weights
+                raw_price, raw_vol, raw_macro, portfolio_weights
             )
             turnover = np.sum(np.abs(optimal_weights - portfolio_weights))
             transaction_costs = turnover * transaction_cost * portfolio_value[-1]
@@ -251,7 +260,7 @@ class PortfolioOptimizer:
             portfolio_weights = optimal_weights
             peak = np.max(portfolio_value)
             drawdown_history.append((new_value - peak) / peak)
-        pd.Series(portfolio_value[1:])
+
         portfolio_returns_series = pd.Series(portfolio_returns)
         sharpe_ratio = (
             portfolio_returns_series.mean()
@@ -259,20 +268,27 @@ class PortfolioOptimizer:
             * np.sqrt(252)
         )
         max_drawdown = np.min(drawdown_history)
-        volatility = portfolio_returns_series.std() * np.sqrt(252)
+        vol = portfolio_returns_series.std() * np.sqrt(252)
+
         self.performance_metrics = {
             "total_return": portfolio_value[-1] / initial_capital - 1,
             "sharpe_ratio": sharpe_ratio,
             "max_drawdown": max_drawdown,
-            "annualized_volatility": volatility,
+            "volatility": vol,
         }
+
+        if hasattr(price_data, "index"):
+            result_index = price_data.index[self.lookback_window :]
+        else:
+            result_index = range(n_steps)
+
         results = pd.DataFrame(
             {
                 "portfolio_value": portfolio_value[1:],
                 "returns": portfolio_returns,
                 "drawdown": drawdown_history[1:],
             },
-            index=price_data.index[self.lookback_window :],
+            index=result_index,
         )
         logger.info("Backtest Complete. Performance:")
         logger.info(pd.Series(self.performance_metrics))

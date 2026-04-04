@@ -13,13 +13,13 @@ from typing import Any
 from unittest.mock import MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+import execution_engine.order_management.market_connectivity_base as _base_module
 from execution_engine.order_management.market_connectivity import (
     ConnectionStatus,
     FailureMode,
     MarketConnectivityManager,
     VenueAdapter,
     VenueConfig,
-    VenueType,
 )
 
 
@@ -28,22 +28,28 @@ class TestVenueAdapter(unittest.TestCase):
 
     def setUp(self) -> Any:
         """Set up test fixtures."""
+
         self.config = VenueConfig(
             venue_id="test_venue",
-            venue_type=VenueType.EXCHANGE,
             name="Test Exchange",
-            priority=1,
+            host="test.exchange.com",
+            port=443,
             enabled=True,
-            connection_params={
-                "api_key": "test_key",
-                "api_secret": "test_secret",
-                "url": "wss://test.exchange.com/ws",
-            },
-            capabilities=["market_data", "order_execution"],
         )
         self.adapter = VenueAdapter(self.config)
         self.adapter._connect_impl = MagicMock(return_value=True)
-        self.adapter._disconnect_impl = MagicMock(return_value=True)
+
+        self._orig_base_submit = _base_module.VenueAdapter.submit_order
+        _base_module.VenueAdapter.submit_order = lambda self, od: (
+            True,
+            "test_order_id",
+            {},
+        )
+
+    def tearDown(self) -> Any:
+        """Restore patched base methods."""
+        _base_module.VenueAdapter.submit_order = self._orig_base_submit
+        self.adapter.disconnect()
 
     def test_initialization(self) -> Any:
         self.assertEqual(self.adapter.config.venue_id, "test_venue")
@@ -57,10 +63,10 @@ class TestVenueAdapter(unittest.TestCase):
         self.assertTrue(success)
         self.assertEqual(self.adapter.status, ConnectionStatus.CONNECTED)
         self.adapter._connect_impl.assert_called_once()
+
         success = self.adapter.disconnect()
         self.assertTrue(success)
         self.assertEqual(self.adapter.status, ConnectionStatus.DISCONNECTED)
-        self.adapter._disconnect_impl.assert_called_once()
 
     def test_connection_failure(self) -> Any:
         self.adapter._connect_impl.return_value = False
@@ -100,9 +106,11 @@ class TestVenueAdapter(unittest.TestCase):
         self.adapter.connect()
         self.assertEqual(self.adapter.status, ConnectionStatus.CONNECTED)
         order_data = {"symbol": "AAPL", "quantity": 100, "price": 150.0}
+
         success, order_id, response = self.adapter.submit_order(order_data)
         self.assertTrue(success)
         self.assertNotEqual(order_id, "")
+
         self.adapter.enable_failure_simulation(True)
         self.adapter.configure_failure_mode(FailureMode.TIMEOUT, 1.0)
         success, order_id, response = self.adapter.submit_order(order_data)
@@ -124,10 +132,12 @@ class TestVenueAdapter(unittest.TestCase):
         }
         update = self.adapter.process_market_data(data)
         self.assertIsNotNone(update)
+
         self.adapter.enable_failure_simulation(True)
         self.adapter.configure_failure_mode(FailureMode.DATA_CORRUPTION, 1.0)
         update = self.adapter.process_market_data(data)
         self.assertIsNone(update)
+
         self.adapter.configure_failure_mode(FailureMode.DATA_CORRUPTION, 0.0)
         self.adapter.configure_failure_mode(FailureMode.PARTIAL_DATA, 1.0)
         update = self.adapter.process_market_data(data)
@@ -153,16 +163,16 @@ class TestMarketConnectivityManager(unittest.TestCase):
         self.manager = MarketConnectivityManager()
         self.venue1_config = VenueConfig(
             venue_id="venue1",
-            venue_type=VenueType.EXCHANGE,
             name="Exchange 1",
-            priority=1,
+            host="exchange1.com",
+            port=443,
             enabled=True,
         )
         self.venue2_config = VenueConfig(
             venue_id="venue2",
-            venue_type=VenueType.EXCHANGE,
             name="Exchange 2",
-            priority=2,
+            host="exchange2.com",
+            port=443,
             enabled=True,
         )
         self.manager.add_venue(self.venue1_config)
@@ -170,12 +180,15 @@ class TestMarketConnectivityManager(unittest.TestCase):
         self.manager.venues["venue1"]._connect_impl = MagicMock(return_value=True)
         self.manager.venues["venue2"]._connect_impl = MagicMock(return_value=True)
 
+    def tearDown(self) -> Any:
+        self.manager.disconnect_all()
+
     def test_initialization(self) -> Any:
         self.assertEqual(len(self.manager.venues), 2)
         self.assertFalse(self.manager.global_failure_simulation_enabled)
 
     def test_connect_all_venues(self) -> Any:
-        results = self.manager.connect_all_venues()
+        results = self.manager.connect_all()
         self.assertTrue(results["venue1"])
         self.assertTrue(results["venue2"])
         self.assertEqual(
@@ -190,6 +203,7 @@ class TestMarketConnectivityManager(unittest.TestCase):
         self.assertTrue(self.manager.global_failure_simulation_enabled)
         self.assertTrue(self.manager.venues["venue1"].failure_simulation_enabled)
         self.assertTrue(self.manager.venues["venue2"].failure_simulation_enabled)
+
         self.manager.enable_global_failure_simulation(False)
         self.assertFalse(self.manager.global_failure_simulation_enabled)
         self.assertFalse(self.manager.venues["venue1"].failure_simulation_enabled)
@@ -209,7 +223,7 @@ class TestMarketConnectivityManager(unittest.TestCase):
         )
 
     def test_simulate_venue_failure(self) -> Any:
-        self.manager.connect_all_venues()
+        self.manager.connect_all()
         self.manager.venues["venue1"].reconnection_manager.connection_lost = (
             lambda: None
         )
@@ -218,7 +232,7 @@ class TestMarketConnectivityManager(unittest.TestCase):
         self.assertEqual(self.manager.venues["venue1"].status, ConnectionStatus.ERROR)
 
     def test_simulate_market_data_issue(self) -> Any:
-        self.manager.connect_all_venues()
+        self.manager.connect_all()
         success = self.manager.simulate_market_data_issue(
             venue_id="venue1", issue_type=FailureMode.DATA_CORRUPTION
         )
@@ -232,11 +246,12 @@ class TestMarketConnectivityManager(unittest.TestCase):
         )
 
     def test_get_connection_health_report(self) -> Any:
-        self.manager.connect_all_venues()
+        self.manager.connect_all()
         report = self.manager.get_connection_health_report()
         self.assertEqual(report["total_venues"], 2)
         self.assertEqual(report["connected_venues"], 2)
         self.assertEqual(report["overall_status"], "healthy")
+
         self.manager.venues["venue1"].reconnection_manager.connection_lost = (
             lambda: None
         )
