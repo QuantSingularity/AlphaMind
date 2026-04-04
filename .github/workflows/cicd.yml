@@ -1,4 +1,4 @@
-name: CI Formatting Check
+name: CICD
 
 on:
   push:
@@ -148,7 +148,95 @@ jobs:
           fi
 
       # -------------------------------
-      # Finalize
+      # Finalize formatting
       # -------------------------------
-      - name: Finalize Check
+      - name: Finalize Formatting Check
         run: echo "All formatting checks completed successfully."
+
+  # ============================================================
+  # Test job — runs after formatting passes
+  # ============================================================
+  test:
+    runs-on: ubuntu-latest
+    needs: formatting_check
+
+    env:
+      BACKEND_DIR: backend
+
+    steps:
+      # -------------------------------
+      # Checkout repository
+      # -------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -------------------------------
+      # Python Setup + Caching
+      # -------------------------------
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-test-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-test-
+
+      # -------------------------------
+      # Install dependencies
+      # -------------------------------
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f "${{ env.BACKEND_DIR }}/requirements.txt" ]; then
+            pip install -r "${{ env.BACKEND_DIR }}/requirements.txt"
+          fi
+          pip install pytest pytest-cov pytest-asyncio
+
+      # -------------------------------
+      # Run test suites
+      # -------------------------------
+      - name: Run tests (pytest — unittest + pytest discovery)
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          set -euo pipefail
+          echo "=== Running full test suite ==="
+          pytest tests/ \
+            --tb=short \
+            --strict-markers \
+            -v \
+            --cov=. \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --junitxml=test-results.xml
+
+      # -------------------------------
+      # Upload test artifacts
+      # -------------------------------
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ${{ env.BACKEND_DIR }}/test-results.xml
+          retention-days: 30
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ${{ env.BACKEND_DIR }}/coverage.xml
+          retention-days: 30
+
+      # -------------------------------
+      # Finalize tests
+      # -------------------------------
+      - name: Finalize Test Run
+        run: echo "All test cases completed successfully."
