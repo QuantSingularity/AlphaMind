@@ -19,16 +19,12 @@ const initialState = {
 export const loadSavedSettings = createAsyncThunk(
   "settings/loadSaved",
   async () => {
-    const saved = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);
-    return saved ? JSON.parse(saved) : null;
-  },
-);
-
-export const persistSettings = createAsyncThunk(
-  "settings/persist",
-  async (_, { getState }) => {
-    const settings = getState().settings;
-    await AsyncStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    try {
+      const saved = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);
+      return saved ? JSON.parse(saved) : null;
+    } catch (_error) {
+      return null;
+    }
   },
 );
 
@@ -55,7 +51,7 @@ const settingsSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(loadSavedSettings.fulfilled, (state, action) => {
       if (action.payload) {
-        return { ...state, ...action.payload };
+        return { ...initialState, ...action.payload };
       }
     });
   },

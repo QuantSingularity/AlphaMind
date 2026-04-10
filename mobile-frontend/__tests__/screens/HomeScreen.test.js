@@ -67,19 +67,28 @@ const renderWithProviders = (store) =>
 describe("HomeScreen", () => {
   it("renders the dashboard title", () => {
     renderWithProviders(createMockStore());
-    expect(screen.getByText("AlphaMind Dashboard")).toBeTruthy();
+    expect(screen.getByText("Dashboard")).toBeTruthy();
   });
 
-  it("shows welcome message when user is logged in", () => {
+  it("shows welcome message with user name when logged in", () => {
     const store = createMockStore(null, {
       name: "John Doe",
       email: "john@example.com",
     });
     renderWithProviders(store);
-    expect(screen.getByText("Welcome back, John Doe!")).toBeTruthy();
+    expect(screen.getByText("John Doe")).toBeTruthy();
+    expect(screen.getByText("Welcome back, ")).toBeTruthy();
   });
 
-  it("renders KPI cards with zero values when no data", () => {
+  it("shows welcome with email when name not set", () => {
+    const store = createMockStore(null, {
+      email: "john@example.com",
+    });
+    renderWithProviders(store);
+    expect(screen.getByText("john@example.com")).toBeTruthy();
+  });
+
+  it("renders all KPI card titles", () => {
     renderWithProviders(createMockStore());
     expect(screen.getByText("Portfolio Value")).toBeTruthy();
     expect(screen.getByText("Daily P&L")).toBeTruthy();
@@ -87,11 +96,28 @@ describe("HomeScreen", () => {
     expect(screen.getByText("Active Strategies")).toBeTruthy();
   });
 
+  it("renders KPI cards with zero values when no data", () => {
+    renderWithProviders(createMockStore());
+    expect(screen.getByText("$0.00")).toBeTruthy();
+    expect(screen.getAllByText("0.0%")).toHaveLength(2);
+  });
+
   it("renders KPI cards with portfolio data", () => {
     const store = createMockStore(mockPortfolioData);
     renderWithProviders(store);
-    expect(screen.getByText("Portfolio Value")).toBeTruthy();
-    expect(screen.getByText("Active Strategies")).toBeTruthy();
     expect(screen.getByText("12")).toBeTruthy();
+    expect(screen.getByText("2.35")).toBeTruthy();
+  });
+
+  it("shows subtitle text", () => {
+    renderWithProviders(createMockStore());
+    expect(
+      screen.getByText("Real-time quantitative trading overview"),
+    ).toBeTruthy();
+  });
+
+  it("shows performance section label", () => {
+    renderWithProviders(createMockStore());
+    expect(screen.getByText("Performance")).toBeTruthy();
   });
 });

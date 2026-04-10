@@ -4,10 +4,11 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  View,
 } from "react-native";
 import {
   Button,
-  Headline,
+  HelperText,
   Snackbar,
   Text,
   TextInput,
@@ -79,8 +80,70 @@ export default function RegisterScreen({ navigation }) {
 
   const displayError = localError || error;
 
+  const passwordsMatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
+
   const isFormValid =
     name.trim() && email.trim() && password && confirmPassword;
+
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: "center",
+      padding: 28,
+    },
+    logoContainer: {
+      alignItems: "center",
+      marginBottom: 32,
+    },
+    logoCircle: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: theme.colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 14,
+    },
+    logoText: {
+      color: theme.colors.onPrimary,
+      fontSize: 24,
+      fontWeight: "900",
+    },
+    appName: {
+      fontSize: 24,
+      fontWeight: "800",
+      color: theme.colors.onBackground,
+    },
+    subtitle: {
+      marginTop: 6,
+      fontSize: 14,
+      color: theme.colors.onSurfaceVariant,
+      textAlign: "center",
+    },
+    input: { marginBottom: 4 },
+    inputSpacing: { marginBottom: 12 },
+    button: { marginTop: 12, borderRadius: 12 },
+    buttonContent: { paddingVertical: 6 },
+    dividerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 20,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: theme.colors.outline,
+      opacity: 0.4,
+    },
+    dividerText: {
+      marginHorizontal: 12,
+      color: theme.colors.onSurfaceVariant,
+      fontSize: 12,
+    },
+    linkButton: { marginTop: 4 },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -88,14 +151,16 @@ export default function RegisterScreen({ navigation }) {
       style={styles.container}
     >
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { backgroundColor: theme.colors.background },
-        ]}
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Headline style={styles.title}>Create Account</Headline>
-        <Text style={styles.subtitle}>Join AlphaMind to start trading</Text>
+        <View style={styles.logoContainer}>
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoText}>α</Text>
+          </View>
+          <Text style={styles.appName}>Create Account</Text>
+          <Text style={styles.subtitle}>Join AlphaMind to start trading</Text>
+        </View>
 
         <TextInput
           label="Full Name"
@@ -106,9 +171,10 @@ export default function RegisterScreen({ navigation }) {
           autoComplete="name"
           autoCorrect={false}
           style={styles.input}
-          left={<TextInput.Icon icon="account" />}
+          left={<TextInput.Icon icon="account-outline" />}
           testID="name-input"
         />
+        <View style={styles.inputSpacing} />
 
         <TextInput
           label="Email"
@@ -120,9 +186,10 @@ export default function RegisterScreen({ navigation }) {
           autoComplete="email"
           autoCorrect={false}
           style={styles.input}
-          left={<TextInput.Icon icon="email" />}
+          left={<TextInput.Icon icon="email-outline" />}
           testID="email-input"
         />
+        <View style={styles.inputSpacing} />
 
         <TextInput
           label="Password"
@@ -133,15 +200,21 @@ export default function RegisterScreen({ navigation }) {
           autoCapitalize="none"
           autoComplete="new-password"
           style={styles.input}
-          left={<TextInput.Icon icon="lock" />}
+          left={<TextInput.Icon icon="lock-outline" />}
           right={
             <TextInput.Icon
-              icon={showPassword ? "eye-off" : "eye"}
+              icon={showPassword ? "eye-off-outline" : "eye-outline"}
               onPress={() => setShowPassword(!showPassword)}
             />
           }
           testID="password-input"
         />
+        <HelperText
+          type="info"
+          visible={password.length > 0 && password.length < MIN_PASSWORD_LENGTH}
+        >
+          Password must be at least {MIN_PASSWORD_LENGTH} characters
+        </HelperText>
 
         <TextInput
           label="Confirm Password"
@@ -152,15 +225,19 @@ export default function RegisterScreen({ navigation }) {
           autoCapitalize="none"
           autoComplete="new-password"
           style={styles.input}
-          left={<TextInput.Icon icon="lock-check" />}
+          error={passwordsMatch}
+          left={<TextInput.Icon icon="lock-check-outline" />}
           right={
             <TextInput.Icon
-              icon={showConfirmPassword ? "eye-off" : "eye"}
+              icon={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             />
           }
           testID="confirm-password-input"
         />
+        <HelperText type="error" visible={passwordsMatch}>
+          Passwords do not match
+        </HelperText>
 
         <Button
           mode="contained"
@@ -170,16 +247,22 @@ export default function RegisterScreen({ navigation }) {
           style={styles.button}
           contentStyle={styles.buttonContent}
         >
-          Register
+          Create Account
         </Button>
 
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
         <Button
-          mode="text"
+          mode="outlined"
           onPress={() => navigation.navigate("Login")}
           style={styles.linkButton}
           disabled={loading}
         >
-          Already have an account? Login
+          Already have an account? Sign In
         </Button>
 
         <Snackbar
@@ -197,34 +280,3 @@ export default function RegisterScreen({ navigation }) {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    marginTop: 16,
-  },
-  buttonContent: {
-    paddingVertical: 4,
-  },
-  container: {
-    flex: 1,
-  },
-  input: {
-    marginBottom: 16,
-  },
-  linkButton: {
-    marginTop: 8,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: 20,
-  },
-  subtitle: {
-    marginBottom: 32,
-    textAlign: "center",
-  },
-  title: {
-    marginBottom: 8,
-    textAlign: "center",
-  },
-});

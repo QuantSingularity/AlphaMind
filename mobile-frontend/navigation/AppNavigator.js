@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { BottomNavigation, useTheme } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import DocumentationScreen from "../screens/DocumentationScreen";
 import FeaturesScreen from "../screens/FeaturesScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -54,14 +53,6 @@ const renderScene = BottomNavigation.SceneMap({
   settings: SettingsRoute,
 });
 
-const renderIcon = ({ route, focused, color }) => (
-  <Icon
-    name={focused ? route.focusedIcon : route.unfocusedIcon}
-    size={24}
-    color={color}
-  />
-);
-
 export default function AppNavigator() {
   const [index, setIndex] = useState(0);
   const theme = useTheme();
@@ -71,7 +62,6 @@ export default function AppNavigator() {
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
       renderScene={renderScene}
-      renderIcon={renderIcon}
       activeColor={theme.colors.primary}
       barStyle={{ backgroundColor: theme.colors.surface }}
     />

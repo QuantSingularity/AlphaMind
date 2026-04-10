@@ -16,6 +16,7 @@ jest.mock("expo-constants", () => ({
       extra: {
         apiBaseUrl: "http://localhost:5000",
       },
+      version: "1.0.0",
     },
   },
 }));
@@ -38,10 +39,33 @@ jest.mock("react-native-svg", () => {
   };
 });
 
+jest.mock("react-native-safe-area-context", () => {
+  const React = require("react");
+  return {
+    SafeAreaProvider: ({ children }) =>
+      React.createElement("View", {}, children),
+    SafeAreaView: ({ children }) => React.createElement("View", {}, children),
+    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+    SafeAreaConsumer: ({ children }) =>
+      children({ top: 0, bottom: 0, left: 0, right: 0 }),
+  };
+});
+
 jest.mock("react-native-paper", () => {
   const RealModule = jest.requireActual("react-native-paper");
   return RealModule;
 });
+
+jest.mock(
+  "../../store/settingsListener",
+  () => ({
+    settingsListenerMiddleware: {
+      middleware: () => (next) => (action) => next(action),
+      startListening: jest.fn(),
+    },
+  }),
+  { virtual: true },
+);
 
 global.console = {
   ...console,

@@ -3,7 +3,6 @@ module.exports = {
   transformIgnorePatterns: [
     "node_modules/(?!(react-native|@react-native|@react-navigation|react-native-paper|react-native-vector-icons|react-native-svg|victory-native|react-native-chart-kit|@react-native-async-storage|expo|expo-status-bar|expo-constants|expo-modules-core|@expo)/)",
   ],
-  setupFilesAfterFramework: [],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   collectCoverageFrom: [
@@ -20,5 +19,4 @@ module.exports = {
   moduleNameMapper: {
     "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/__mocks__/fileMock.js",
   },
-  testEnvironment: "node",
 };

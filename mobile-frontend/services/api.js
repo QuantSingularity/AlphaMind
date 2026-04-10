@@ -29,6 +29,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (error.code === "ECONNABORTED") {
+      return Promise.reject({
+        message: "Request timed out - please try again",
+        status: 0,
+      });
+    }
+
     if (error.response) {
       const { status } = error.response;
 
@@ -54,11 +61,6 @@ api.interceptors.response.use(
     } else if (error.request) {
       return Promise.reject({
         message: "Network error - please check your connection",
-        status: 0,
-      });
-    } else if (error.code === "ECONNABORTED") {
-      return Promise.reject({
-        message: "Request timed out - please try again",
         status: 0,
       });
     } else {

@@ -1,17 +1,12 @@
-import React, { useCallback, useEffect, useMemo } from "react";
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { Headline, Paragraph, useTheme } from "react-native-paper";
+import { useCallback, useEffect, useMemo } from "react";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Text, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import ErrorMessage from "../components/ErrorMessage";
 import KPICard from "../components/KPICard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { fetchPortfolio } from "../store/slices/portfolioSlice";
+import { useState } from "react";
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -19,7 +14,7 @@ export default function HomeScreen() {
 
   const { data, loading, error } = useSelector((state) => state.portfolio);
   const { user } = useSelector((state) => state.auth);
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     dispatch(fetchPortfolio());
@@ -38,28 +33,28 @@ export default function HomeScreen() {
           title: "Portfolio Value",
           value: "$0.00",
           change: "0.0%",
-          changeColor: "gray",
+          changeColor: theme.colors.outline,
           icon: "chart-line",
         },
         {
           title: "Daily P&L",
           value: "$0.00",
           change: "0.0%",
-          changeColor: "gray",
+          changeColor: theme.colors.outline,
           icon: "trending-up",
         },
         {
           title: "Sharpe Ratio",
           value: "0.00",
           change: "",
-          changeColor: "gray",
+          changeColor: theme.colors.outline,
           icon: "chart-bell-curve-cumulative",
         },
         {
           title: "Active Strategies",
           value: "0",
           change: "",
-          changeColor: "gray",
+          changeColor: theme.colors.outline,
           icon: "robot",
         },
       ];
@@ -78,7 +73,8 @@ export default function HomeScreen() {
     })}`;
     const dailyPnLPercent = data.dailyPnLPercent ?? 0;
     const dailyPnLChange = `${dailyPnLPercent >= 0 ? "+" : ""}${dailyPnLPercent.toFixed(2)}%`;
-    const changeColor = dailyPnLPercent >= 0 ? "green" : "red";
+    const changeColor =
+      dailyPnLPercent >= 0 ? theme.colors.success : theme.colors.error;
 
     return [
       {
@@ -110,7 +106,7 @@ export default function HomeScreen() {
         icon: "robot",
       },
     ];
-  }, [data, theme.colors.primary]);
+  }, [data, theme.colors]);
 
   const styles = useMemo(
     () =>
@@ -120,10 +116,41 @@ export default function HomeScreen() {
           flexGrow: 1,
           padding: 16,
         },
-        infoText: {
-          color: theme.colors.outline,
-          marginTop: 16,
-          textAlign: "center",
+        headerSection: {
+          marginBottom: 24,
+          paddingTop: 8,
+        },
+        greetingRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 4,
+        },
+        welcomeText: {
+          fontSize: 13,
+          color: theme.colors.onSurfaceVariant,
+        },
+        userName: {
+          fontSize: 13,
+          color: theme.colors.primary,
+          fontWeight: "700",
+        },
+        titleText: {
+          fontSize: 24,
+          fontWeight: "800",
+          color: theme.colors.onBackground,
+          marginBottom: 4,
+        },
+        subtitleText: {
+          fontSize: 13,
+          color: theme.colors.onSurfaceVariant,
+        },
+        sectionLabel: {
+          fontSize: 12,
+          fontWeight: "700",
+          color: theme.colors.onSurfaceVariant,
+          letterSpacing: 1,
+          textTransform: "uppercase",
+          marginBottom: 12,
         },
         kpiContainer: {
           flexDirection: "row",
@@ -131,20 +158,17 @@ export default function HomeScreen() {
           justifyContent: "space-between",
           marginBottom: 24,
         },
-        paragraph: {
-          fontSize: 16,
-          marginBottom: 24,
-          textAlign: "center",
+        infoCard: {
+          backgroundColor: theme.colors.surfaceVariant,
+          borderRadius: 12,
+          padding: 16,
+          marginTop: 8,
         },
-        title: {
-          marginBottom: 8,
+        infoText: {
+          color: theme.colors.onSurfaceVariant,
+          fontSize: 13,
           textAlign: "center",
-        },
-        welcome: {
-          color: theme.colors.onBackground,
-          fontSize: 14,
-          marginBottom: 16,
-          textAlign: "center",
+          lineHeight: 20,
         },
       }),
     [theme],
@@ -167,30 +191,40 @@ export default function HomeScreen() {
     <ScrollView
       contentContainerStyle={styles.container}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[theme.colors.primary]}
+          tintColor={theme.colors.primary}
+        />
       }
     >
-      {user && (
-        <Text style={styles.welcome}>
-          Welcome back, {user.name || user.email}!
+      <View style={styles.headerSection}>
+        {user && (
+          <View style={styles.greetingRow}>
+            <Text style={styles.welcomeText}>Welcome back, </Text>
+            <Text style={styles.userName}>{user.name || user.email}</Text>
+          </View>
+        )}
+        <Text style={styles.titleText}>Dashboard</Text>
+        <Text style={styles.subtitleText}>
+          Real-time quantitative trading overview
         </Text>
-      )}
+      </View>
 
-      <Headline style={styles.title}>AlphaMind Dashboard</Headline>
-      <Paragraph style={styles.paragraph}>
-        Real-time overview of your quantitative trading performance.
-      </Paragraph>
-
+      <Text style={styles.sectionLabel}>Performance</Text>
       <View style={styles.kpiContainer}>
         {kpiData.map((kpi, index) => (
           <KPICard key={index} {...kpi} isLoading={loading} />
         ))}
       </View>
 
-      <Paragraph style={styles.infoText}>
-        Navigate using the bottom tabs to explore features, documentation, and
-        research.
-      </Paragraph>
+      <View style={styles.infoCard}>
+        <Text style={styles.infoText}>
+          Pull down to refresh · Use bottom tabs to explore features,
+          documentation, and research
+        </Text>
+      </View>
     </ScrollView>
   );
 }

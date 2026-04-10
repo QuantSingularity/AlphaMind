@@ -4,10 +4,10 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  View,
 } from "react-native";
 import {
   Button,
-  Headline,
   Snackbar,
   Text,
   TextInput,
@@ -56,22 +56,82 @@ export default function LoginScreen({ navigation }) {
 
   const displayError = localError || error;
 
+  const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.colors.background },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: "center",
+      padding: 28,
+    },
+    logoContainer: {
+      alignItems: "center",
+      marginBottom: 40,
+    },
+    logoCircle: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: theme.colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 16,
+    },
+    logoText: {
+      color: theme.colors.onPrimary,
+      fontSize: 28,
+      fontWeight: "900",
+      letterSpacing: 1,
+    },
+    appName: {
+      fontSize: 26,
+      fontWeight: "800",
+      color: theme.colors.onBackground,
+      letterSpacing: 0.5,
+    },
+    subtitle: {
+      marginTop: 6,
+      fontSize: 14,
+      color: theme.colors.onSurfaceVariant,
+      textAlign: "center",
+    },
+    input: { marginBottom: 16 },
+    button: { marginTop: 8, borderRadius: 12 },
+    buttonContent: { paddingVertical: 6 },
+    dividerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 20,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: theme.colors.outline,
+      opacity: 0.4,
+    },
+    dividerText: {
+      marginHorizontal: 12,
+      color: theme.colors.onSurfaceVariant,
+      fontSize: 12,
+    },
+    linkButton: { marginTop: 4 },
+  });
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { backgroundColor: theme.colors.background },
-        ]}
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Headline style={styles.title}>Welcome to AlphaMind</Headline>
-        <Text style={styles.subtitle}>
-          Login to access your trading dashboard
-        </Text>
+        <View style={styles.logoContainer}>
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoText}>α</Text>
+          </View>
+          <Text style={styles.appName}>AlphaMind</Text>
+          <Text style={styles.subtitle}>Sign in to your trading dashboard</Text>
+        </View>
 
         <TextInput
           label="Email"
@@ -83,7 +143,7 @@ export default function LoginScreen({ navigation }) {
           autoComplete="email"
           autoCorrect={false}
           style={styles.input}
-          left={<TextInput.Icon icon="email" />}
+          left={<TextInput.Icon icon="email-outline" />}
           testID="email-input"
         />
 
@@ -96,10 +156,10 @@ export default function LoginScreen({ navigation }) {
           autoCapitalize="none"
           autoComplete="current-password"
           style={styles.input}
-          left={<TextInput.Icon icon="lock" />}
+          left={<TextInput.Icon icon="lock-outline" />}
           right={
             <TextInput.Icon
-              icon={showPassword ? "eye-off" : "eye"}
+              icon={showPassword ? "eye-off-outline" : "eye-outline"}
               onPress={() => setShowPassword(!showPassword)}
             />
           }
@@ -114,16 +174,22 @@ export default function LoginScreen({ navigation }) {
           style={styles.button}
           contentStyle={styles.buttonContent}
         >
-          Login
+          Sign In
         </Button>
 
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
         <Button
-          mode="text"
+          mode="outlined"
           onPress={() => navigation.navigate("Register")}
           style={styles.linkButton}
           disabled={loading}
         >
-          Don&apos;t have an account? Register
+          Create an Account
         </Button>
 
         <Snackbar
@@ -141,34 +207,3 @@ export default function LoginScreen({ navigation }) {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    marginTop: 16,
-  },
-  buttonContent: {
-    paddingVertical: 4,
-  },
-  container: {
-    flex: 1,
-  },
-  input: {
-    marginBottom: 16,
-  },
-  linkButton: {
-    marginTop: 8,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: 20,
-  },
-  subtitle: {
-    marginBottom: 32,
-    textAlign: "center",
-  },
-  title: {
-    marginBottom: 8,
-    textAlign: "center",
-  },
-});

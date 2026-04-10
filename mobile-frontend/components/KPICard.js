@@ -1,6 +1,5 @@
 import { StyleSheet, View } from "react-native";
 import { Card, Text, useTheme } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function KPICard({
   title,
@@ -12,76 +11,90 @@ export default function KPICard({
 }) {
   const theme = useTheme();
 
+  const styles = StyleSheet.create({
+    card: {
+      marginBottom: 14,
+      width: "48%",
+      borderRadius: 16,
+      backgroundColor: theme.colors.surface,
+      elevation: 2,
+    },
+    cardContent: {
+      alignItems: "flex-start",
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+    },
+    iconRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    iconContainer: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: theme.colors.primary + "1A",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    iconText: {
+      fontSize: 18,
+    },
+    title: {
+      fontSize: 11,
+      fontWeight: "600",
+      color: theme.colors.onSurfaceVariant,
+      letterSpacing: 0.3,
+      marginBottom: 4,
+      textTransform: "uppercase",
+    },
+    value: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: theme.colors.onSurface,
+      letterSpacing: -0.5,
+    },
+    change: {
+      fontSize: 12,
+      fontWeight: "600",
+      marginTop: 3,
+    },
+  });
+
+  const iconMap = {
+    "chart-line": "📈",
+    "trending-up": "💹",
+    "chart-bell-curve-cumulative": "📊",
+    robot: "🤖",
+  };
+
   return (
     <Card
       style={styles.card}
       accessible
       accessibilityLabel={`${title}: ${isLoading ? "loading" : value}`}
     >
-      <Card.Content style={styles.cardContent}>
+      <View style={styles.cardContent}>
         {icon && (
-          <Icon
-            name={icon}
-            size={32}
-            color={theme.colors.primary}
-            style={styles.icon}
-          />
+          <View style={styles.iconRow}>
+            <View style={styles.iconContainer}>
+              <Text style={styles.iconText}>{iconMap[icon] || "📌"}</Text>
+            </View>
+          </View>
         )}
-        <View style={styles.textContainer}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.value}>{isLoading ? "—" : value}</Text>
+        {!!change && (
           <Text
-            variant="labelSmall"
-            style={[styles.title, { color: theme.colors.onSurfaceVariant }]}
+            style={[
+              styles.change,
+              { color: changeColor || theme.colors.onSurface },
+            ]}
           >
-            {title}
+            {change}
           </Text>
-          <Text
-            variant="titleMedium"
-            style={[styles.value, { color: theme.colors.onSurface }]}
-          >
-            {isLoading ? "—" : value}
-          </Text>
-          {!!change && (
-            <Text
-              variant="labelSmall"
-              style={[
-                styles.change,
-                { color: changeColor || theme.colors.onSurface },
-              ]}
-            >
-              {change}
-            </Text>
-          )}
-        </View>
-      </Card.Content>
+        )}
+      </View>
     </Card>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    marginBottom: 16,
-    width: "48%",
-  },
-  cardContent: {
-    alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-  },
-  change: {
-    marginTop: 2,
-    textAlign: "center",
-  },
-  icon: {
-    marginBottom: 8,
-  },
-  textContainer: {
-    alignItems: "center",
-  },
-  title: {
-    marginBottom: 2,
-    textAlign: "center",
-  },
-  value: {
-    textAlign: "center",
-  },
-});

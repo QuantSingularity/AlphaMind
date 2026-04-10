@@ -25,11 +25,11 @@ describe("config constants", () => {
 
   it("exports API_ENDPOINTS with all required sections", () => {
     const { API_ENDPOINTS } = require("../../constants/config");
-    expect(API_ENDPOINTS).toHaveProperty("AUTH.LOGIN");
-    expect(API_ENDPOINTS).toHaveProperty("AUTH.REGISTER");
-    expect(API_ENDPOINTS).toHaveProperty("AUTH.LOGOUT");
-    expect(API_ENDPOINTS).toHaveProperty("PORTFOLIO.LIST");
-    expect(API_ENDPOINTS).toHaveProperty("RESEARCH.PAPERS");
+    expect(API_ENDPOINTS.AUTH).toHaveProperty("LOGIN");
+    expect(API_ENDPOINTS.AUTH).toHaveProperty("REGISTER");
+    expect(API_ENDPOINTS.AUTH).toHaveProperty("LOGOUT");
+    expect(API_ENDPOINTS.PORTFOLIO).toHaveProperty("LIST");
+    expect(API_ENDPOINTS.RESEARCH).toHaveProperty("PAPERS");
   });
 
   it("PORTFOLIO.DETAILS returns correct URL with id", () => {
@@ -49,5 +49,20 @@ describe("config constants", () => {
   it("ENABLE_MOCK_DATA defaults to false", () => {
     const { ENABLE_MOCK_DATA } = require("../../constants/config");
     expect(typeof ENABLE_MOCK_DATA).toBe("boolean");
+  });
+
+  it("STRATEGIES endpoints have correct shape", () => {
+    const { API_ENDPOINTS } = require("../../constants/config");
+    expect(API_ENDPOINTS.STRATEGIES).toHaveProperty("LIST");
+    expect(API_ENDPOINTS.STRATEGIES.DETAILS("s1")).toBe("/api/strategies/s1");
+    expect(API_ENDPOINTS.STRATEGIES.PERFORMANCE("s1")).toBe(
+      "/api/strategies/s1/performance",
+    );
+  });
+
+  it("MARKET endpoints exist", () => {
+    const { API_ENDPOINTS } = require("../../constants/config");
+    expect(API_ENDPOINTS.MARKET).toHaveProperty("QUOTES");
+    expect(API_ENDPOINTS.MARKET).toHaveProperty("CHART");
   });
 });

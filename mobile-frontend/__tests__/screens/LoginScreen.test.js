@@ -51,11 +51,9 @@ describe("LoginScreen", () => {
       <LoginScreen navigation={{ navigate: mockNavigate }} />,
     );
 
-    expect(screen.getByText("Welcome to AlphaMind")).toBeTruthy();
-    expect(
-      screen.getByText("Login to access your trading dashboard"),
-    ).toBeTruthy();
-    expect(screen.getByText("Login")).toBeTruthy();
+    expect(screen.getByText("AlphaMind")).toBeTruthy();
+    expect(screen.getByText("Sign in to your trading dashboard")).toBeTruthy();
+    expect(screen.getByText("Sign In")).toBeTruthy();
   });
 
   it("allows input in email and password fields", () => {
@@ -73,13 +71,13 @@ describe("LoginScreen", () => {
     expect(passwordInput.props.value).toBe("password123");
   });
 
-  it("login button is disabled with empty fields", () => {
+  it("sign in button is disabled with empty fields", () => {
     renderWithProviders(
       <LoginScreen navigation={{ navigate: mockNavigate }} />,
     );
 
-    const loginButton = screen.getByText("Login").parent;
-    expect(loginButton.props.accessibilityState?.disabled).toBe(true);
+    const signInButton = screen.getByText("Sign In").parent;
+    expect(signInButton.props.accessibilityState?.disabled).toBe(true);
   });
 
   it("navigates to register screen when link is pressed", () => {
@@ -87,7 +85,7 @@ describe("LoginScreen", () => {
       <LoginScreen navigation={{ navigate: mockNavigate }} />,
     );
 
-    const registerButton = screen.getByText("Don't have an account? Register");
+    const registerButton = screen.getByText("Create an Account");
     fireEvent.press(registerButton);
 
     expect(mockNavigate).toHaveBeenCalledWith("Register");
@@ -103,13 +101,39 @@ describe("LoginScreen", () => {
     fireEvent.changeText(emailInput, "notanemail");
     fireEvent.changeText(passwordInput, "password123");
 
-    const loginButton = screen.getByText("Login");
-    fireEvent.press(loginButton);
+    const signInButton = screen.getByText("Sign In");
+    fireEvent.press(signInButton);
 
     await waitFor(() => {
       expect(
         screen.getByText("Please enter a valid email address"),
       ).toBeTruthy();
+    });
+  });
+
+  it("shows error for missing email", async () => {
+    renderWithProviders(
+      <LoginScreen navigation={{ navigate: mockNavigate }} />,
+    );
+
+    fireEvent.changeText(screen.getByTestId("password-input"), "password123");
+    fireEvent.press(screen.getByText("Sign In"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Email is required")).toBeTruthy();
+    });
+  });
+
+  it("shows error for missing password", async () => {
+    renderWithProviders(
+      <LoginScreen navigation={{ navigate: mockNavigate }} />,
+    );
+
+    fireEvent.changeText(screen.getByTestId("email-input"), "test@example.com");
+    fireEvent.press(screen.getByText("Sign In"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Password is required")).toBeTruthy();
     });
   });
 });

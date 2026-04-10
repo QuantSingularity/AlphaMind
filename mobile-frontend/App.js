@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   Provider as ReduxProvider,
   useDispatch,
@@ -37,7 +38,11 @@ function AppContent() {
   const theme = effectiveTheme === "dark" ? darkTheme : lightTheme;
 
   if (loading) {
-    return <LoadingSpinner message="Loading AlphaMind..." />;
+    return (
+      <PaperProvider theme={theme}>
+        <LoadingSpinner message="Loading AlphaMind..." />
+      </PaperProvider>
+    );
   }
 
   return (
@@ -52,8 +57,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ReduxProvider store={store}>
-      <AppContent />
-    </ReduxProvider>
+    <SafeAreaProvider>
+      <ReduxProvider store={store}>
+        <AppContent />
+      </ReduxProvider>
+    </SafeAreaProvider>
   );
 }
