@@ -1,7 +1,5 @@
 # AlphaMind Code Repository
 
-## Institutional-Grade Quantitative AI Trading System
-
 ---
 
 ## Executive Summary
@@ -100,19 +98,19 @@ AlphaMind is a comprehensive, production-ready quantitative trading platform eng
 
 ### Optional Dependencies
 
-| Category               | Package                 | Purpose  |
-| ---------------------- | ----------------------- | -------- | ---------------------------- |
-| Deep Learning          | TensorFlow              | >=2.15.0 | Neural network models        |
-| Deep Learning          | PyTorch                 | >=2.0.0  | Deep learning framework      |
-| Reinforcement Learning | stable-baselines3       | >=2.0.0  | RL agents                    |
-| Quantitative Finance   | QuantLib                | >=1.31   | Financial instrument pricing |
-| Data Streaming         | confluent-kafka         | >=2.0.0  | Kafka streaming integration  |
-| Database               | SQLAlchemy              | >=2.0.0  | ORM for relational databases |
-| Database               | psycopg2-binary         | >=2.9.0  | PostgreSQL adapter           |
-| Database               | redis                   | >=5.0.0  | In-memory caching            |
-| Alternative Data       | sentinelhub             | >=3.9.0  | Satellite imagery processing |
-| Alternative Data       | sec-edgar-downloader    | >=5.0.0  | SEC filings retrieval        |
-| Cloud                  | google-cloud-aiplatform | >=1.40.0 | GCP Vertex AI integration    |
+| Category               | Package                   | Version   | Purpose                      |
+| :--------------------- | :------------------------ | :-------- | :--------------------------- |
+| Deep Learning          | `TensorFlow`              | >= 2.15.0 | Neural network models        |
+| Deep Learning          | `PyTorch`                 | >= 2.0.0  | Deep learning framework      |
+| Reinforcement Learning | `stable-baselines3`       | >= 2.0.0  | RL agents                    |
+| Quantitative Finance   | `QuantLib`                | >= 1.31   | Financial instrument pricing |
+| Data Streaming         | `confluent-kafka`         | >= 2.0.0  | Kafka streaming integration  |
+| Database               | `SQLAlchemy`              | >= 2.0.0  | ORM for relational databases |
+| Database               | `psycopg2-binary`         | >= 2.9.0  | PostgreSQL adapter           |
+| Database               | `redis`                   | >= 5.0.0  | In-memory caching            |
+| Alternative Data       | `sentinelhub`             | >= 3.9.0  | Satellite imagery processing |
+| Alternative Data       | `sec-edgar-downloader`    | >= 5.0.0  | SEC filings retrieval        |
+| Cloud                  | `google-cloud-aiplatform` | >= 1.40.0 | GCP Vertex AI integration    |
 
 ---
 
