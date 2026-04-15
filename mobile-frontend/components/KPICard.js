@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import { Card, Text, useTheme } from "react-native-paper";
+import { Text, useTheme } from "react-native-paper";
 
 export default function KPICard({
   title,
@@ -11,56 +11,6 @@ export default function KPICard({
 }) {
   const theme = useTheme();
 
-  const styles = StyleSheet.create({
-    card: {
-      marginBottom: 14,
-      width: "48%",
-      borderRadius: 16,
-      backgroundColor: theme.colors.surface,
-      elevation: 2,
-    },
-    cardContent: {
-      alignItems: "flex-start",
-      paddingHorizontal: 14,
-      paddingVertical: 14,
-    },
-    iconRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: 10,
-    },
-    iconContainer: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      backgroundColor: theme.colors.primary + "1A",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    iconText: {
-      fontSize: 18,
-    },
-    title: {
-      fontSize: 11,
-      fontWeight: "600",
-      color: theme.colors.onSurfaceVariant,
-      letterSpacing: 0.3,
-      marginBottom: 4,
-      textTransform: "uppercase",
-    },
-    value: {
-      fontSize: 18,
-      fontWeight: "800",
-      color: theme.colors.onSurface,
-      letterSpacing: -0.5,
-    },
-    change: {
-      fontSize: 12,
-      fontWeight: "600",
-      marginTop: 3,
-    },
-  });
-
   const iconMap = {
     "chart-line": "📈",
     "trending-up": "💹",
@@ -68,8 +18,64 @@ export default function KPICard({
     robot: "🤖",
   };
 
+  const styles = StyleSheet.create({
+    card: {
+      marginBottom: 12,
+      width: "48.5%",
+      borderRadius: 8,
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.outlineVariant,
+      // shadow matching web: shadow rounded-lg
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      elevation: 2,
+      overflow: "hidden",
+    },
+    cardContent: {
+      padding: 16,
+    },
+    iconRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    iconContainer: {
+      width: 32,
+      height: 32,
+      borderRadius: 6,
+      backgroundColor: theme.colors.primaryLight || "#DBEAFE",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    iconText: {
+      fontSize: 16,
+    },
+    title: {
+      fontSize: 11,
+      fontWeight: "500",
+      color: theme.colors.onSurfaceVariant,
+      letterSpacing: 0.5,
+      marginBottom: 4,
+      textTransform: "uppercase",
+    },
+    value: {
+      fontSize: 20,
+      fontWeight: "700",
+      color: theme.colors.onSurface,
+      letterSpacing: -0.3,
+    },
+    change: {
+      fontSize: 12,
+      fontWeight: "600",
+      marginTop: 4,
+    },
+  });
+
   return (
-    <Card
+    <View
       style={styles.card}
       accessible
       accessibilityLabel={`${title}: ${isLoading ? "loading" : value}`}
@@ -95,6 +101,6 @@ export default function KPICard({
           </Text>
         )}
       </View>
-    </Card>
+    </View>
   );
 }

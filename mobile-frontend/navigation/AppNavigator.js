@@ -15,15 +15,15 @@ const SettingsRoute = () => <SettingsScreen />;
 const routes = [
   {
     key: "home",
-    title: "Home",
-    focusedIcon: "home",
-    unfocusedIcon: "home-outline",
+    title: "Dashboard",
+    focusedIcon: "view-dashboard",
+    unfocusedIcon: "view-dashboard-outline",
   },
   {
     key: "features",
-    title: "Features",
-    focusedIcon: "star",
-    unfocusedIcon: "star-outline",
+    title: "Strategies",
+    focusedIcon: "trending-up",
+    unfocusedIcon: "trending-up",
   },
   {
     key: "docs",
@@ -63,7 +63,12 @@ export default function AppNavigator() {
       onIndexChange={setIndex}
       renderScene={renderScene}
       activeColor={theme.colors.primary}
-      barStyle={{ backgroundColor: theme.colors.surface }}
+      inactiveColor={theme.colors.onSurfaceVariant}
+      barStyle={{
+        backgroundColor: theme.colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: theme.colors.outlineVariant,
+      }}
     />
   );
 }

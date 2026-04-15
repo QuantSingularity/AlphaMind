@@ -1,41 +1,37 @@
-import { StyleSheet, View } from "react-native";
-import { ActivityIndicator, Text, useTheme } from "react-native-paper";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { Text, useTheme } from "react-native-paper";
 
-export default function LoadingSpinner({
-  message = "Loading...",
-  size = "large",
-  fullScreen = true,
-}) {
+export default function LoadingSpinner({ message = "Loading..." }) {
   const theme = useTheme();
 
   const styles = StyleSheet.create({
     container: {
-      alignItems: "center",
       flex: 1,
+      alignItems: "center",
       justifyContent: "center",
       backgroundColor: theme.colors.background,
+      padding: 24,
     },
-    inline: {
+    spinnerWrapper: {
+      width: 48,
+      height: 48,
       alignItems: "center",
       justifyContent: "center",
-      paddingVertical: 20,
+      marginBottom: 16,
     },
     message: {
-      marginTop: 16,
       fontSize: 14,
       color: theme.colors.onSurfaceVariant,
+      textAlign: "center",
     },
   });
 
   return (
-    <View
-      style={fullScreen ? styles.container : styles.inline}
-      accessible
-      accessibilityRole="progressbar"
-      accessibilityLabel={message}
-    >
-      <ActivityIndicator size={size} color={theme.colors.primary} />
-      {!!message && <Text style={styles.message}>{message}</Text>}
+    <View style={styles.container}>
+      <View style={styles.spinnerWrapper}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+      <Text style={styles.message}>{message}</Text>
     </View>
   );
 }
