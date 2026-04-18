@@ -15,6 +15,10 @@
 - [API Reference](API.md) - REST API endpoints and schemas
 - [CLI Reference](CLI.md) - Command-line interface documentation
 
+### Performance & Validation
+
+- [Backtest Results](BACKTEST_RESULTS.md) - Empirical tearsheets, Sharpe ratios, and walk-forward analysis for all strategies
+
 ### Features & Architecture
 
 - [Feature Matrix](FEATURE_MATRIX.md) - Complete feature overview

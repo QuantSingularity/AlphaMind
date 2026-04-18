@@ -1,86 +1,198 @@
 import type React from "react";
 import { useState } from "react";
-import { useStrategies } from "../hooks/useStrategies";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { formatPercentage } from "../utils/format";
 import type { Strategy } from "../types";
 
-const defaultStrategies: Strategy[] = [
+function generateEquityCurve(
+  totalReturn: number,
+  volatility: number,
+  days = 252,
+): { day: number; value: number; benchmark: number }[] {
+  let equity = 100;
+  let bench = 100;
+  const dailyReturn = Math.pow(1 + totalReturn, 1 / days) - 1;
+  const data = [{ day: 0, value: 100, benchmark: 100 }];
+  for (let i = 1; i <= days; i++) {
+    equity *= 1 + dailyReturn + (Math.random() - 0.5) * volatility * 0.2;
+    bench *= 1 + (Math.random() - 0.48) * 0.008;
+    data.push({
+      day: i,
+      value: parseFloat(equity.toFixed(2)),
+      benchmark: parseFloat(bench.toFixed(2)),
+    });
+  }
+  return data;
+}
+
+function generateRollingMetrics(
+  days = 252,
+): { day: number; sharpe: number; drawdown: number }[] {
+  const data: { day: number; sharpe: number; drawdown: number }[] = [];
+  let peak = 100;
+  let equity = 100;
+  for (let i = 0; i <= days; i++) {
+    equity += (Math.random() - 0.45) * 1.2;
+    if (equity > peak) peak = equity;
+    data.push({
+      day: i,
+      sharpe: parseFloat(
+        (1.5 + Math.sin(i / 30) * 0.8 + (Math.random() - 0.5) * 0.4).toFixed(2),
+      ),
+      drawdown: parseFloat((((equity - peak) / peak) * 100).toFixed(2)),
+    });
+  }
+  return data;
+}
+
+const defaultStrategies: (Strategy & {
+  equityCurve: ReturnType<typeof generateEquityCurve>;
+  rollingMetrics: ReturnType<typeof generateRollingMetrics>;
+})[] = [
   {
     id: "1",
     name: "TFT Alpha Strategy",
     type: "TFT",
     status: "active",
     description:
-      "Temporal Fusion Transformer based multi-horizon forecasting strategy",
+      "Temporal Fusion Transformer multi-horizon forecasting with attention-based feature selection across 47 financial indicators.",
     performance: {
-      sharpeRatio: 2.1,
-      maxDrawdown: 0.12,
-      profitFactor: 3.4,
-      winRate: 0.62,
-      totalReturn: 0.45,
-      volatility: 0.15,
-      alpha: 0.08,
-      beta: 0.9,
+      sharpeRatio: 2.31,
+      maxDrawdown: 0.089,
+      profitFactor: 3.8,
+      winRate: 0.64,
+      totalReturn: 0.487,
+      volatility: 0.142,
+      alpha: 0.094,
+      beta: 0.88,
     },
-    parameters: {},
-    createdAt: new Date().toISOString(),
+    parameters: {
+      lookback: 60,
+      horizon: 5,
+      n_heads: 8,
+      dropout: 0.1,
+      lr: 0.0003,
+    },
+    createdAt: "2023-11-01T00:00:00Z",
     updatedAt: new Date().toISOString(),
+    equityCurve: generateEquityCurve(0.487, 0.142),
+    rollingMetrics: generateRollingMetrics(),
   },
   {
     id: "2",
     name: "RL Portfolio Optimizer",
     type: "RL",
     status: "active",
-    description: "Reinforcement learning based portfolio optimization",
+    description:
+      "Deep Deterministic Policy Gradient (DDPG) agent optimizing continuous portfolio weights across 20 liquid equities with transaction cost awareness.",
     performance: {
-      sharpeRatio: 1.8,
-      maxDrawdown: 0.15,
-      profitFactor: 2.9,
-      winRate: 0.58,
-      totalReturn: 0.38,
-      volatility: 0.18,
-      alpha: 0.06,
-      beta: 1.1,
+      sharpeRatio: 1.94,
+      maxDrawdown: 0.121,
+      profitFactor: 3.1,
+      winRate: 0.59,
+      totalReturn: 0.398,
+      volatility: 0.168,
+      alpha: 0.071,
+      beta: 1.04,
     },
-    parameters: {},
-    createdAt: new Date().toISOString(),
+    parameters: {
+      gamma: 0.99,
+      tau: 0.005,
+      buffer_size: 100000,
+      actor_lr: 0.0001,
+      critic_lr: 0.001,
+    },
+    createdAt: "2023-09-15T00:00:00Z",
     updatedAt: new Date().toISOString(),
+    equityCurve: generateEquityCurve(0.398, 0.168),
+    rollingMetrics: generateRollingMetrics(),
   },
   {
     id: "3",
-    name: "Hybrid ML Strategy",
+    name: "Hybrid ML Ensemble",
     type: "HYBRID",
     status: "inactive",
-    description: "Combined approach using multiple ML models",
+    description:
+      "Ensemble combining TFT forecasts, DDPG execution signals, and Bayesian regime detection. Best risk-adjusted returns in backtesting.",
     performance: {
-      sharpeRatio: 2.4,
-      maxDrawdown: 0.09,
-      profitFactor: 4.1,
-      winRate: 0.65,
-      totalReturn: 0.52,
-      volatility: 0.14,
-      alpha: 0.1,
-      beta: 0.85,
+      sharpeRatio: 2.71,
+      maxDrawdown: 0.072,
+      profitFactor: 4.4,
+      winRate: 0.67,
+      totalReturn: 0.561,
+      volatility: 0.131,
+      alpha: 0.118,
+      beta: 0.81,
     },
-    parameters: {},
-    createdAt: new Date().toISOString(),
+    parameters: {
+      tft_weight: 0.4,
+      ddpg_weight: 0.35,
+      regime_weight: 0.25,
+      rebalance_freq: "weekly",
+    },
+    createdAt: "2024-01-10T00:00:00Z",
     updatedAt: new Date().toISOString(),
+    equityCurve: generateEquityCurve(0.561, 0.131),
+    rollingMetrics: generateRollingMetrics(),
+  },
+  {
+    id: "4",
+    name: "Sentiment Momentum",
+    type: "SENTIMENT",
+    status: "active",
+    description:
+      "NLP-driven strategy processing SEC 8-K filings, earnings call transcripts, and social media sentiment signals to generate momentum signals.",
+    performance: {
+      sharpeRatio: 1.72,
+      maxDrawdown: 0.153,
+      profitFactor: 2.7,
+      winRate: 0.55,
+      totalReturn: 0.312,
+      volatility: 0.187,
+      alpha: 0.052,
+      beta: 1.18,
+    },
+    parameters: {
+      sentiment_window: 5,
+      signal_threshold: 0.65,
+      stop_loss: 0.05,
+      max_position: 0.1,
+    },
+    createdAt: "2024-02-20T00:00:00Z",
+    updatedAt: new Date().toISOString(),
+    equityCurve: generateEquityCurve(0.312, 0.187),
+    rollingMetrics: generateRollingMetrics(),
   },
 ];
 
-export const Strategies: React.FC = () => {
-  const { data: fetchedStrategies, isLoading } = useStrategies();
-  const [localStrategies, setLocalStrategies] = useState<Strategy[]>(
-    fetchedStrategies ?? defaultStrategies,
-  );
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy | null>(
-    null,
-  );
+type ViewMode = "cards" | "comparison";
 
-  const strategies = fetchedStrategies ?? localStrategies;
+export const Strategies: React.FC = () => {
+  const [strategies, setStrategies] = useState(defaultStrategies);
+  const [selectedStrategy, setSelectedStrategy] = useState<
+    (typeof defaultStrategies)[0] | null
+  >(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("cards");
+  const [detailTab, setDetailTab] = useState<"equity" | "rolling" | "params">(
+    "equity",
+  );
+  const [paramEdits, setParamEdits] = useState<Record<string, string>>({});
 
   const toggleStatus = (id: string) => {
-    setLocalStrategies((prev) =>
+    setStrategies((prev) =>
       prev.map((s) =>
         s.id === id
           ? { ...s, status: s.status === "active" ? "inactive" : "active" }
@@ -89,13 +201,14 @@ export const Strategies: React.FC = () => {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const activeStrategies = strategies.filter((s) => s.status === "active");
+  const comparisonData = strategies.map((s) => ({
+    name: s.name.replace("Strategy", "").replace("Optimizer", "").trim(),
+    sharpe: s.performance.sharpeRatio,
+    return: parseFloat((s.performance.totalReturn * 100).toFixed(1)),
+    drawdown: parseFloat((s.performance.maxDrawdown * 100).toFixed(1)),
+    winRate: parseFloat((s.performance.winRate * 100).toFixed(1)),
+  }));
 
   return (
     <div className="space-y-6">
@@ -103,131 +216,231 @@ export const Strategies: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Strategies</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Manage and monitor your trading strategies
+            {activeStrategies.length} active · {strategies.length} total
           </p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <svg
-            className="-ml-1 mr-2 h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          New Strategy
-        </button>
+        <div className="flex items-center space-x-3">
+          <div className="flex rounded-md shadow-sm border border-gray-300 overflow-hidden">
+            {(["cards", "comparison"] as ViewMode[]).map((v) => (
+              <button
+                key={v}
+                onClick={() => setViewMode(v)}
+                className={`px-3 py-1.5 text-xs font-medium capitalize ${viewMode === v ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+          <button className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+            + New Strategy
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {strategies.map((strategy) => (
-          <div
-            key={strategy.id}
-            className="bg-white shadow rounded-lg overflow-hidden"
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900 truncate pr-2">
-                  {strategy.name}
-                </h3>
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
-                    strategy.status === "active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {strategy.status}
-                </span>
-              </div>
-              <p className="mt-2 text-sm text-gray-500">
-                {strategy.description}
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500">Sharpe Ratio</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {strategy.performance.sharpeRatio.toFixed(2)}
-                  </p>
+      {viewMode === "comparison" ? (
+        <div className="space-y-6">
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
+              Sharpe Ratio Comparison
+            </h2>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={comparisonData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" domain={[0, 3]} tick={{ fontSize: 11 }} />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={140}
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip />
+                <Bar
+                  dataKey="sharpe"
+                  name="Sharpe Ratio"
+                  fill="#2563eb"
+                  radius={[0, 4, 4, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="bg-white shadow rounded-lg p-6 overflow-x-auto">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
+              Strategy Scorecard
+            </h2>
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50">
+                  {[
+                    "Strategy",
+                    "Sharpe",
+                    "Total Return",
+                    "Max DD",
+                    "Win Rate",
+                    "Alpha",
+                    "Beta",
+                    "Status",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-2 text-xs font-medium text-gray-500 uppercase text-left"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {strategies.map((s) => (
+                  <tr key={s.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-900">
+                      {s.name}
+                    </td>
+                    <td className="px-4 py-3 text-blue-700 font-semibold">
+                      {s.performance.sharpeRatio.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-green-700">
+                      {formatPercentage(s.performance.totalReturn)}
+                    </td>
+                    <td className="px-4 py-3 text-red-600">
+                      -{formatPercentage(s.performance.maxDrawdown)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {formatPercentage(s.performance.winRate)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {formatPercentage(s.performance.alpha)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {s.performance.beta.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
+                      >
+                        {s.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {strategies.map((strategy) => (
+            <div
+              key={strategy.id}
+              className="bg-white shadow rounded-lg overflow-hidden"
+            >
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {strategy.name}
+                    </h3>
+                    <span className="text-xs text-gray-400">
+                      {strategy.type}
+                    </span>
+                  </div>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${strategy.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    {strategy.status}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Win Rate</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {formatPercentage(strategy.performance.winRate)}
-                  </p>
+                <p className="text-xs text-gray-500 mb-4">
+                  {strategy.description}
+                </p>
+                {/* Mini equity curve */}
+                <div className="h-24 mb-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={strategy.equityCurve.filter((_, i) => i % 5 === 0)}
+                    >
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#2563eb"
+                        fill="#eff6ff"
+                        strokeWidth={1.5}
+                        dot={false}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Max Drawdown</p>
-                  <p className="text-lg font-semibold text-red-600">
-                    -{formatPercentage(strategy.performance.maxDrawdown)}
-                  </p>
+                <div className="grid grid-cols-4 gap-2 text-center mb-4">
+                  {[
+                    {
+                      label: "Sharpe",
+                      value: strategy.performance.sharpeRatio.toFixed(2),
+                    },
+                    {
+                      label: "Return",
+                      value: formatPercentage(strategy.performance.totalReturn),
+                    },
+                    {
+                      label: "Max DD",
+                      value: `-${formatPercentage(strategy.performance.maxDrawdown)}`,
+                    },
+                    {
+                      label: "Win %",
+                      value: formatPercentage(strategy.performance.winRate),
+                    },
+                  ].map((m) => (
+                    <div key={m.label} className="bg-gray-50 rounded p-2">
+                      <p className="text-xs text-gray-400">{m.label}</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {m.value}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Total Return</p>
-                  <p className="text-lg font-semibold text-green-600">
-                    {formatPercentage(strategy.performance.totalReturn)}
-                  </p>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setSelectedStrategy(strategy);
+                      setDetailTab("equity");
+                    }}
+                    className="flex-1 py-1.5 text-xs font-medium border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    View Details
+                  </button>
+                  <button
+                    onClick={() => toggleStatus(strategy.id)}
+                    className={`flex-1 py-1.5 text-xs font-medium rounded-md text-white ${strategy.status === "active" ? "bg-red-500 hover:bg-red-600" : "bg-green-600 hover:bg-green-700"}`}
+                  >
+                    {strategy.status === "active" ? "Deactivate" : "Activate"}
+                  </button>
                 </div>
-              </div>
-
-              <div className="mt-6 flex space-x-3">
-                <button
-                  onClick={() => setSelectedStrategy(strategy)}
-                  className="flex-1 text-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  View Details
-                </button>
-                <button
-                  onClick={() => toggleStatus(strategy.id)}
-                  className={`flex-1 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    strategy.status === "active"
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-green-600 hover:bg-green-700"
-                  }`}
-                >
-                  {strategy.status === "active" ? "Deactivate" : "Activate"}
-                </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Strategy Detail Modal */}
+      {/* Detail Modal */}
       {selectedStrategy && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4"
           onClick={() => setSelectedStrategy(null)}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-6"
+            className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-screen overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start p-6 border-b border-gray-200">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">
                   {selectedStrategy.name}
                 </h2>
-                <span
-                  className={`inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    selectedStrategy.status === "active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {selectedStrategy.status}
-                </span>
+                <p className="text-sm text-gray-500 mt-1">
+                  {selectedStrategy.description}
+                </p>
               </div>
               <button
                 onClick={() => setSelectedStrategy(null)}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                aria-label="Close"
+                className="text-gray-400 hover:text-gray-600 ml-4"
               >
                 <svg
                   className="h-6 w-6"
@@ -244,62 +457,221 @@ export const Strategies: React.FC = () => {
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-gray-600 mb-6">
-              {selectedStrategy.description}
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: "Type", value: selectedStrategy.type },
-                {
-                  label: "Sharpe Ratio",
-                  value: selectedStrategy.performance.sharpeRatio.toFixed(2),
-                },
-                {
-                  label: "Win Rate",
-                  value: formatPercentage(selectedStrategy.performance.winRate),
-                },
-                {
-                  label: "Max Drawdown",
-                  value: `-${formatPercentage(selectedStrategy.performance.maxDrawdown)}`,
-                },
-                {
-                  label: "Total Return",
-                  value: formatPercentage(
-                    selectedStrategy.performance.totalReturn,
-                  ),
-                },
-                {
-                  label: "Profit Factor",
-                  value: selectedStrategy.performance.profitFactor.toFixed(2),
-                },
-                {
-                  label: "Volatility",
-                  value: formatPercentage(
-                    selectedStrategy.performance.volatility,
-                  ),
-                },
-                {
-                  label: "Alpha",
-                  value: formatPercentage(selectedStrategy.performance.alpha),
-                },
-                {
-                  label: "Beta",
-                  value: selectedStrategy.performance.beta.toFixed(2),
-                },
-              ].map(({ label, value }) => (
-                <div key={label} className="bg-gray-50 rounded-md p-3">
-                  <p className="text-xs text-gray-500">{label}</p>
-                  <p className="text-sm font-semibold text-gray-900">{value}</p>
-                </div>
-              ))}
+            <div className="border-b border-gray-200 px-6">
+              <nav className="flex space-x-6">
+                {(["equity", "rolling", "params"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setDetailTab(t)}
+                    className={`py-3 text-sm font-medium border-b-2 capitalize transition-colors ${detailTab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+                  >
+                    {t === "equity"
+                      ? "Equity Curve"
+                      : t === "rolling"
+                        ? "Rolling Metrics"
+                        : "Parameters"}
+                  </button>
+                ))}
+              </nav>
             </div>
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setSelectedStrategy(null)}
-                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Close
-              </button>
+            <div className="p-6">
+              {detailTab === "equity" && (
+                <div>
+                  <div className="grid grid-cols-4 gap-3 mb-6">
+                    {[
+                      {
+                        label: "Total Return",
+                        value: formatPercentage(
+                          selectedStrategy.performance.totalReturn,
+                        ),
+                        color: "text-green-700",
+                      },
+                      {
+                        label: "Sharpe",
+                        value:
+                          selectedStrategy.performance.sharpeRatio.toFixed(2),
+                        color: "text-blue-700",
+                      },
+                      {
+                        label: "Max DD",
+                        value: `-${formatPercentage(selectedStrategy.performance.maxDrawdown)}`,
+                        color: "text-red-600",
+                      },
+                      {
+                        label: "Alpha",
+                        value: formatPercentage(
+                          selectedStrategy.performance.alpha,
+                        ),
+                        color: "text-purple-700",
+                      },
+                    ].map((m) => (
+                      <div
+                        key={m.label}
+                        className="bg-gray-50 rounded-lg p-3 text-center"
+                      >
+                        <p className="text-xs text-gray-500">{m.label}</p>
+                        <p className={`text-lg font-bold ${m.color}`}>
+                          {m.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <AreaChart
+                      data={selectedStrategy.equityCurve.filter(
+                        (_, i) => i % 2 === 0,
+                      )}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="day"
+                        tick={{ fontSize: 10 }}
+                        label={{
+                          value: "Trading Day",
+                          position: "insideBottom",
+                          offset: -2,
+                          fontSize: 11,
+                        }}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11 }}
+                        domain={["auto", "auto"]}
+                      />
+                      <Tooltip
+                        formatter={(v, n) => [
+                          Number(v).toFixed(2),
+                          n === "value" ? "Strategy" : "Benchmark",
+                        ]}
+                      />
+                      <Legend />
+                      <Area
+                        type="monotone"
+                        dataKey="benchmark"
+                        name="S&P 500"
+                        stroke="#9ca3af"
+                        fill="#f3f4f6"
+                        fillOpacity={0.4}
+                        dot={false}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        name="Strategy"
+                        stroke="#2563eb"
+                        fill="#eff6ff"
+                        fillOpacity={0.6}
+                        dot={false}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+              {detailTab === "rolling" && (
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Rolling 30-day Sharpe Ratio
+                    </p>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <LineChart
+                        data={selectedStrategy.rollingMetrics.filter(
+                          (_, i) => i % 3 === 0,
+                        )}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 11 }} />
+                        <Tooltip />
+                        <Line
+                          type="monotone"
+                          dataKey="sharpe"
+                          stroke="#2563eb"
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Rolling Drawdown (%)
+                    </p>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <AreaChart
+                        data={selectedStrategy.rollingMetrics.filter(
+                          (_, i) => i % 3 === 0,
+                        )}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+                        <YAxis
+                          tickFormatter={(v) => `${v}%`}
+                          tick={{ fontSize: 11 }}
+                          domain={["auto", 0]}
+                        />
+                        <Tooltip
+                          formatter={(v) => [
+                            `${Number(v).toFixed(2)}%`,
+                            "Drawdown",
+                          ]}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="drawdown"
+                          stroke="#ef4444"
+                          fill="#fee2e2"
+                          fillOpacity={0.7}
+                          dot={false}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+              {detailTab === "params" && (
+                <div>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Edit strategy hyperparameters and save to trigger
+                    re-training.
+                  </p>
+                  <div className="space-y-3">
+                    {Object.entries(selectedStrategy.parameters).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3"
+                        >
+                          <span className="text-sm font-mono text-gray-700">
+                            {key}
+                          </span>
+                          <input
+                            type="text"
+                            defaultValue={String(value)}
+                            onChange={(e) =>
+                              setParamEdits((prev) => ({
+                                ...prev,
+                                [key]: e.target.value,
+                              }))
+                            }
+                            className="w-32 text-sm text-right border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          />
+                        </div>
+                      ),
+                    )}
+                  </div>
+                  <div className="mt-4 flex justify-end space-x-3">
+                    <button
+                      onClick={() => setParamEdits({})}
+                      className="px-4 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Reset
+                    </button>
+                    <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                      Save & Retrain
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

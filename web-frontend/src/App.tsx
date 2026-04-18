@@ -9,6 +9,7 @@ import { Documentation } from "./pages/Documentation";
 import { Home } from "./pages/Home";
 import { NotFound } from "./pages/NotFound";
 import { Portfolio } from "./pages/Portfolio";
+import { RiskManagement } from "./pages/RiskManagement";
 import { Strategies } from "./pages/Strategies";
 
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ function App() {
             <Route path="strategies" element={<Strategies />} />
             <Route path="portfolio" element={<Portfolio />} />
             <Route path="backtest" element={<Backtest />} />
+            <Route path="risk" element={<RiskManagement />} />
             <Route path="documentation" element={<Documentation />} />
             <Route path="about" element={<About />} />
             <Route path="*" element={<NotFound />} />

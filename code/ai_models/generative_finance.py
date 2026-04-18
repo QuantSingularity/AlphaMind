@@ -1,11 +1,16 @@
-from typing import Any, Optional
+from typing import Optional, Tuple
 
 import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Conv1D, Dense, Flatten, LeakyReLU, Reshape
 
 
 class TransformerGenerator(tf.keras.layers.Layer):
-    def __init__(self, seq_length: Any, n_features: Any) -> None:
+    """
+    Generator network for financial time series synthesis.
+    Maps a latent noise vector to a synthetic price/return sequence.
+    """
+
+    def __init__(self, seq_length: int, n_features: int) -> None:
         super().__init__()
         self.seq_length = seq_length
         self.n_features = n_features
@@ -13,14 +18,19 @@ class TransformerGenerator(tf.keras.layers.Layer):
         self.dense2 = Dense(seq_length * n_features)
         self.reshape = Reshape((seq_length, n_features))
 
-    def call(self, inputs: Any) -> Any:
+    def call(self, inputs: tf.Tensor) -> tf.Tensor:
         x = self.dense1(inputs)
         x = self.dense2(x)
         return self.reshape(x)
 
 
 class TimeSeriesDiscriminator(tf.keras.layers.Layer):
-    def __init__(self, seq_length: Any) -> None:
+    """
+    Discriminator network for financial time series.
+    Uses strided 1-D convolutions to classify sequences as real or synthetic.
+    """
+
+    def __init__(self, seq_length: int) -> None:
         super().__init__()
         self.seq_length = seq_length
         self.conv1 = Conv1D(64, kernel_size=3, strides=2, padding="same")
@@ -28,7 +38,7 @@ class TimeSeriesDiscriminator(tf.keras.layers.Layer):
         self.flatten = Flatten()
         self.dense = Dense(1, activation="sigmoid")
 
-    def call(self, inputs: Any) -> Any:
+    def call(self, inputs: tf.Tensor) -> tf.Tensor:
         x = self.conv1(inputs)
         x = LeakyReLU(0.2)(x)
         x = self.conv2(x)
@@ -38,82 +48,108 @@ class TimeSeriesDiscriminator(tf.keras.layers.Layer):
 
 
 class RegimeClassifier(tf.keras.layers.Layer):
-    def __init__(self) -> None:
-        super().__init__()
-        self.lstm = LSTM(64)
-        self.dense = Dense(3, activation="softmax")
+    """
+    LSTM-based market-regime classifier.
+    Identifies bull / bear / sideways / high-volatility regimes from
+    a sequence of returns and macro features.
+    """
 
-    def call(self, inputs: Any) -> Any:
-        x = self.lstm(inputs)
+    def __init__(
+        self,
+        n_regimes: int = 4,
+        lstm_units: int = 64,
+        dropout: float = 0.2,
+    ) -> None:
+        super().__init__()
+        self.lstm = LSTM(lstm_units, return_sequences=False, dropout=dropout)
+        self.dense = Dense(n_regimes, activation="softmax")
+
+    def call(self, inputs: tf.Tensor, training: Optional[bool] = None) -> tf.Tensor:
+        x = self.lstm(inputs, training=training)
         return self.dense(x)
 
 
-def regime_consistency_loss(
-    regime_match: Any, expected_distribution: Optional[Any] = None
-) -> Any:
-    if expected_distribution is None:
-        expected_distribution = tf.constant([0.6, 0.3, 0.1], dtype=tf.float32)
-    expected_distribution = expected_distribution / tf.reduce_sum(expected_distribution)
-    regime_match = tf.clip_by_value(regime_match, 1e-08, 1.0)
-    expected_broadcast = tf.broadcast_to(expected_distribution, tf.shape(regime_match))
-    kl_per_sample = tf.reduce_sum(
-        expected_broadcast * tf.math.log(expected_broadcast / regime_match), axis=-1
-    )
-    return tf.reduce_mean(kl_per_sample)
-
-
-class MarketGAN(tf.keras.Model):
+class FinancialTimeSeriesGAN(tf.keras.Model):
     """
-    GAN with an Auxiliary Classifier for generating synthetic market time series.
+    Generative Adversarial Network for synthetic financial data generation.
+    Produces realistic multi-variate return sequences for data augmentation
+    and stress-testing of trading strategies.
     """
 
-    def __init__(self, seq_length: Any, n_features: Any, batch_size: int = 32) -> None:
+    def __init__(
+        self,
+        seq_length: int,
+        n_features: int,
+        latent_dim: int = 100,
+        g_lr: float = 2e-4,
+        d_lr: float = 2e-4,
+    ) -> None:
         super().__init__()
         self.seq_length = seq_length
         self.n_features = n_features
-        self.latent_dim = 100
-        self.batch_size = batch_size
+        self.latent_dim = latent_dim
+
         self.generator = TransformerGenerator(seq_length, n_features)
         self.discriminator = TimeSeriesDiscriminator(seq_length)
-        self.aux_classifier = RegimeClassifier()
+
+        self.g_optimizer = tf.keras.optimizers.Adam(g_lr, beta_1=0.5)
+        self.d_optimizer = tf.keras.optimizers.Adam(d_lr, beta_1=0.5)
         self.loss_fn = tf.keras.losses.BinaryCrossentropy()
 
-    def compile(self, g_optimizer: Any, d_optimizer: Any) -> Any:
-        super().compile()
-        self.g_optimizer = g_optimizer
-        self.d_optimizer = d_optimizer
+        self.g_loss_tracker = tf.keras.metrics.Mean(name="g_loss")
+        self.d_loss_tracker = tf.keras.metrics.Mean(name="d_loss")
 
     @tf.function
-    def train_step(self, real_data: Any) -> Any:
-        batch_size = tf.shape(real_data)[0]
-        noise = tf.random.normal(shape=[batch_size, self.latent_dim])
-        fake_data = self.generator(noise)
-        real_labels = tf.ones((batch_size, 1))
-        fake_labels = tf.zeros((batch_size, 1))
+    def train_step(self, real_sequences: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+        """
+        One training step: update discriminator then generator.
 
-        # Train Discriminator
+        Args:
+            real_sequences: Batch of real financial sequences, shape
+                (batch, seq_length, n_features).
+
+        Returns:
+            Tuple of (discriminator_loss, generator_loss).
+        """
+        batch_size = tf.shape(real_sequences)[0]
+        noise = tf.random.normal((batch_size, self.latent_dim))
+
+        # ---- Discriminator update ----
         with tf.GradientTape() as d_tape:
-            real_pred = self.discriminator(real_data)
-            fake_pred = self.discriminator(fake_data)
-            d_loss_real = self.loss_fn(real_labels, real_pred)
-            d_loss_fake = self.loss_fn(fake_labels, fake_pred)
-            d_loss = d_loss_real + d_loss_fake
+            fake_sequences = self.generator(noise, training=True)
+            real_pred = self.discriminator(real_sequences, training=True)
+            fake_pred = self.discriminator(fake_sequences, training=True)
+            d_loss = self.loss_fn(tf.ones_like(real_pred), real_pred) + self.loss_fn(
+                tf.zeros_like(fake_pred), fake_pred
+            )
         d_grads = d_tape.gradient(d_loss, self.discriminator.trainable_variables)
         self.d_optimizer.apply_gradients(
             zip(d_grads, self.discriminator.trainable_variables)
         )
 
-        # Train Generator
-        noise = tf.random.normal(shape=[batch_size, self.latent_dim])
+        # ---- Generator update ----
         with tf.GradientTape() as g_tape:
-            fake_data = self.generator(noise)
-            validity = self.discriminator(fake_data)
-            regime_match = self.aux_classifier(fake_data)
-            aux_loss = regime_consistency_loss(regime_match)
-            g_loss = self.loss_fn(real_labels, validity) + aux_loss
+            fake_sequences = self.generator(noise, training=True)
+            fake_pred = self.discriminator(fake_sequences, training=True)
+            g_loss = self.loss_fn(tf.ones_like(fake_pred), fake_pred)
         g_grads = g_tape.gradient(g_loss, self.generator.trainable_variables)
         self.g_optimizer.apply_gradients(
             zip(g_grads, self.generator.trainable_variables)
         )
 
-        return {"d_loss": d_loss, "g_loss": g_loss, "aux_loss": aux_loss}
+        self.g_loss_tracker.update_state(g_loss)
+        self.d_loss_tracker.update_state(d_loss)
+        return d_loss, g_loss
+
+    def generate(self, n_samples: int) -> tf.Tensor:
+        """
+        Generate synthetic financial time series.
+
+        Args:
+            n_samples: Number of sequences to generate.
+
+        Returns:
+            Tensor of shape (n_samples, seq_length, n_features).
+        """
+        noise = tf.random.normal((n_samples, self.latent_dim))
+        return self.generator(noise, training=False)

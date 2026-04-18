@@ -1,6 +1,6 @@
 import datetime
 import os
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 import bcrypt
 import jwt
