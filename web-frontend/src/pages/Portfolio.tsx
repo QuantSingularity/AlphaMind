@@ -8,8 +8,6 @@ import {
   CartesianGrid,
   Cell,
   Legend,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -17,6 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import type { PieLabelRenderProps } from "recharts";
 import { usePositions } from "../hooks/usePortfolio";
 import {
   formatCurrency,
@@ -328,13 +327,9 @@ export const Portfolio: React.FC = () => {
                     cy="50%"
                     outerRadius={90}
                     dataKey="value"
-                    label={({
-                      name,
-                      percent,
-                    }: {
-                      name: string;
-                      percent: number;
-                    }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }: PieLabelRenderProps) =>
+                      `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`
+                    }
                     labelLine={false}
                   >
                     {allocationData.map((_, i) => (

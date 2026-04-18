@@ -2,7 +2,7 @@
 FastAPI dependency injection utilities for AlphaMind.
 """
 
-from typing import Dict
+from typing import Any, Dict
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

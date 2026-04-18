@@ -6,7 +6,7 @@ financial machine learning models, including risk-adjusted returns,
 drawdown analysis, and prediction quality metrics.
 """
 
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd

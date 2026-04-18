@@ -5,6 +5,7 @@ This module contains tests for the position limits functionality.
 """
 
 import unittest
+from typing import Any
 
 from risk.aggregation.position_limits import (
     LimitScope,

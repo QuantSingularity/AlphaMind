@@ -1,17 +1,10 @@
 import type React from "react";
 import { useMemo, useState } from "react";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  Legend,
-  Line,
-  LineChart,
-  PieChart,
-  Pie,
   RadarChart,
   Radar,
   PolarGrid,
@@ -22,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatCurrency, formatPercentage } from "../utils/format";
+import { formatCurrency } from "../utils/format";
 
 const STRESS_SCENARIOS = [
   {

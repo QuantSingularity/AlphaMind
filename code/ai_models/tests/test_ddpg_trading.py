@@ -9,7 +9,7 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../.."))
 
-from code.ai_models.ddpg_trading import (
+from ai_models.ddpg_trading import (
     Actor,
     Critic,
     DDPGTradingAgent,

@@ -67,7 +67,7 @@ class TemporalAttentionBlock(tf.keras.layers.Layer):
         dropout_rate: float = 0.1,
     ) -> None:
         super().__init__()
-        self.attention = MultiHeadAttention(d_model, num_heads)
+        self.mha = MultiHeadAttention(d_model, num_heads)
         self.ffn = tf.keras.Sequential(
             [
                 tf.keras.layers.Dense(dff, activation="relu"),
@@ -85,7 +85,7 @@ class TemporalAttentionBlock(tf.keras.layers.Layer):
         training: bool = False,
         mask: Optional[tf.Tensor] = None,
     ) -> tf.Tensor:
-        attn_output = self.attention(x, x, x, mask)
+        attn_output = self.mha(x, x, x, mask)
         attn_output = self.dropout1(attn_output, training=training)
         out1 = self.norm1(x + attn_output)
         ffn_output = self.ffn(out1)
@@ -93,18 +93,18 @@ class TemporalAttentionBlock(tf.keras.layers.Layer):
         return self.norm2(out1 + ffn_output)
 
 
-def get_positional_encoding(seq_len: int, d_model: int) -> tf.Tensor:
+def get_positional_encoding(seq_length: int, d_model: int) -> tf.Tensor:
     """
     Compute sinusoidal positional encodings.
 
     Args:
-        seq_len: Length of the input sequence.
+        seq_length: Length of the input sequence.
         d_model: Dimension of the model embeddings.
 
     Returns:
-        Positional encoding tensor of shape (1, seq_len, d_model).
+        Positional encoding tensor of shape (1, seq_length, d_model).
     """
-    positions = np.arange(seq_len)[:, np.newaxis]
+    positions = np.arange(seq_length)[:, np.newaxis]
     dims = np.arange(d_model)[np.newaxis, :]
     angles = positions / np.power(10000, (2 * (dims // 2)) / np.float32(d_model))
     angles[:, 0::2] = np.sin(angles[:, 0::2])
@@ -124,19 +124,23 @@ class FinancialTimeSeriesTransformer(tf.keras.Model):
         d_model: int,
         num_heads: int,
         dff: int,
-        input_dim: int,
-        output_dim: int,
+        input_seq_length: int,
+        output_seq_length: int,
         dropout_rate: float = 0.1,
     ) -> None:
         super().__init__()
         self.d_model = d_model
+        self.num_layers = num_layers
+        self.input_seq_length = input_seq_length
+        self.output_seq_length = output_seq_length
         self.input_projection = tf.keras.layers.Dense(d_model)
         self.enc_layers = [
             TemporalAttentionBlock(d_model, num_heads, dff, dropout_rate)
             for _ in range(num_layers)
         ]
         self.dropout = tf.keras.layers.Dropout(dropout_rate)
-        self.final_layer = tf.keras.layers.Dense(output_dim)
+        # Per-timestep projection: (batch, seq_len, d_model) -> (batch, seq_len, output_seq_length)
+        self.final_layer = tf.keras.layers.Dense(output_seq_length)
 
     def call(
         self,
@@ -150,6 +154,5 @@ class FinancialTimeSeriesTransformer(tf.keras.Model):
         x = self.dropout(x, training=training)
         for layer in self.enc_layers:
             x = layer(x, training=training, mask=mask)
-        # Global average pooling over time dimension
-        x = tf.reduce_mean(x, axis=1)
+        # Per-timestep output: (batch, seq_len, output_seq_length)
         return self.final_layer(x)

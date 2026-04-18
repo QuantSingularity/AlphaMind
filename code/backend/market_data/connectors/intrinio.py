@@ -1,6 +1,6 @@
 import logging
 from datetime import date, datetime
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from market_data.connectors.base import (
     APIConnector,

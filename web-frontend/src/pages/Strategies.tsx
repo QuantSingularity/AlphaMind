@@ -646,7 +646,7 @@ export const Strategies: React.FC = () => {
                           </span>
                           <input
                             type="text"
-                            defaultValue={String(value)}
+                            value={paramEdits[key] ?? String(value)}
                             onChange={(e) =>
                               setParamEdits((prev) => ({
                                 ...prev,

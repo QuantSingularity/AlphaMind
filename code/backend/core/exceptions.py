@@ -1,7 +1,7 @@
 import datetime
 import logging
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("AlphaMind.Exceptions")
 logger.setLevel(logging.INFO)

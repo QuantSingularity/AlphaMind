@@ -5,6 +5,7 @@ This module contains tests for the portfolio risk aggregation functionality.
 """
 
 import unittest
+from typing import Any
 
 import numpy as np
 import pandas as pd

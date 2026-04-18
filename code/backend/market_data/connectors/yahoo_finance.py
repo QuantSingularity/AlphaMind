@@ -8,7 +8,7 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from market_data.connectors.base import (
