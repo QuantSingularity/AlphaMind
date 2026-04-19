@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authService } from "../../services/authService";
 
 jest.mock("../../services/api", () => ({
+  __esModule: true,
   default: {
     post: jest.fn(),
     get: jest.fn(),

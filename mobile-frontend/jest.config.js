@@ -1,7 +1,7 @@
 module.exports = {
   preset: "jest-expo",
   transformIgnorePatterns: [
-    "node_modules/(?!(react-native|@react-native|@react-navigation|react-native-paper|react-native-vector-icons|react-native-svg|victory-native|react-native-chart-kit|@react-native-async-storage|expo|expo-status-bar|expo-constants|expo-modules-core|@expo)/)",
+    "node_modules/(?!(react-native|@react-native|@react-navigation|react-native-paper|react-native-vector-icons|react-native-svg|victory-native|react-native-chart-kit|@react-native-async-storage|expo|expo-status-bar|expo-constants|expo-modules-core|@expo|@reduxjs/toolkit|immer|redux|react-redux)/)",
   ],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],

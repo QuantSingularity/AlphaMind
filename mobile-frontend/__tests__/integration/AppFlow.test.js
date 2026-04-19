@@ -13,6 +13,7 @@ import portfolioReducer from "../../store/slices/portfolioSlice";
 import settingsReducer from "../../store/slices/settingsSlice";
 
 jest.mock("../../services/api", () => ({
+  __esModule: true,
   default: {
     post: jest.fn(),
     get: jest.fn(),

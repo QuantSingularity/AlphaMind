@@ -41,13 +41,24 @@ jest.mock("react-native-svg", () => {
 
 jest.mock("react-native-safe-area-context", () => {
   const React = require("react");
+  const insets = { top: 0, bottom: 0, left: 0, right: 0 };
+  const SafeAreaInsetsContext = React.createContext(insets);
   return {
     SafeAreaProvider: ({ children }) =>
-      React.createElement("View", {}, children),
-    SafeAreaView: ({ children }) => React.createElement("View", {}, children),
-    useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
-    SafeAreaConsumer: ({ children }) =>
-      children({ top: 0, bottom: 0, left: 0, right: 0 }),
+      React.createElement(
+        SafeAreaInsetsContext.Provider,
+        { value: insets },
+        children,
+      ),
+    SafeAreaView: ({ children, style }) =>
+      React.createElement("View", { style }, children),
+    useSafeAreaInsets: () => insets,
+    SafeAreaConsumer: SafeAreaInsetsContext.Consumer,
+    SafeAreaInsetsContext,
+    initialWindowMetrics: {
+      insets,
+      frame: { x: 0, y: 0, width: 390, height: 844 },
+    },
   };
 });
 

@@ -1,6 +1,7 @@
 import { portfolioService } from "../../services/portfolioService";
 
 jest.mock("../../services/api", () => ({
+  __esModule: true,
   default: {
     get: jest.fn(),
     interceptors: {
