@@ -51,14 +51,11 @@ export default function RegisterScreen({ navigation }) {
       setLocalError("Password is required");
       return;
     }
+    // Password length and mismatch are shown by HelperText — no localError needed
     if (password.length < MIN_PASSWORD_LENGTH) {
-      setLocalError(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
-      );
       return;
     }
     if (password !== confirmPassword) {
-      setLocalError("Passwords do not match");
       return;
     }
     dispatch(
@@ -184,7 +181,7 @@ export default function RegisterScreen({ navigation }) {
         </View>
 
         <View style={styles.formCard}>
-          <Text style={styles.formLabel}>Create Account</Text>
+          <Text style={styles.formLabel}>Register</Text>
 
           <TextInput
             label="Full Name"
@@ -277,13 +274,26 @@ export default function RegisterScreen({ navigation }) {
             mode="contained"
             onPress={handleRegister}
             loading={loading}
-            disabled={loading || !isFormValid}
+            disabled={loading}
             style={styles.primaryButton}
             contentStyle={styles.primaryButtonContent}
             buttonColor={theme.colors.primary}
           >
             Create Account
           </Button>
+
+          {!!localError && (
+            <Text
+              style={{
+                color: "#DC2626",
+                fontSize: 13,
+                marginTop: 8,
+                textAlign: "center",
+              }}
+            >
+              {localError}
+            </Text>
+          )}
 
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
@@ -302,15 +312,6 @@ export default function RegisterScreen({ navigation }) {
             Already have an account? Sign In
           </Button>
         </View>
-
-        <Snackbar
-          visible={!!displayError}
-          onDismiss={handleDismissError}
-          duration={4000}
-          action={{ label: "Dismiss", onPress: handleDismissError }}
-        >
-          {displayError}
-        </Snackbar>
       </ScrollView>
     </KeyboardAvoidingView>
   );

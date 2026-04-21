@@ -27,11 +27,15 @@ export default function LoadingSpinner({ message = "Loading..." }) {
   });
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      accessible={true}
+      accessibilityRole="progressbar"
+    >
       <View style={styles.spinnerWrapper}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
-      <Text style={styles.message}>{message}</Text>
+      {!!message && <Text style={styles.message}>{message}</Text>}
     </View>
   );
 }

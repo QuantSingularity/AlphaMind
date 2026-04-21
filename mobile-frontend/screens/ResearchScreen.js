@@ -245,7 +245,7 @@ export default function ResearchScreen() {
             <Text style={styles.emptyIcon}>📄</Text>
             <Text style={styles.emptyTitle}>No papers available</Text>
             <Text style={styles.emptyText}>
-              No research papers available at this time. Pull down to refresh.
+              No research papers available at this time.
             </Text>
           </View>
         ) : (

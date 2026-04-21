@@ -1,7 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import { Button, Text, useTheme } from "react-native-paper";
 
-export default function ErrorMessage({ message, onRetry }) {
+export default function ErrorMessage({
+  title = "Something went wrong",
+  message,
+  onRetry,
+}) {
   const theme = useTheme();
 
   const styles = StyleSheet.create({
@@ -55,10 +59,10 @@ export default function ErrorMessage({ message, onRetry }) {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessible={true} accessibilityRole="alert">
       <View style={styles.errorBox}>
         <Text style={styles.icon}>⚠️</Text>
-        <Text style={styles.title}>Something went wrong</Text>
+        <Text style={styles.title}>{title}</Text>
         {message && <Text style={styles.message}>{message}</Text>}
         {onRetry && (
           <Button

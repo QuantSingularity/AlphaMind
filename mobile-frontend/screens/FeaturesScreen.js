@@ -24,7 +24,7 @@ const features = [
     tag: "Analytics",
     tagColor: "#2563EB",
     description:
-      "Advanced ML models and quantitative techniques for alpha generation and strategy development.",
+      "Leverage advanced machine learning models and quantitative techniques for alpha generation and strategy development.",
     items: [
       "Machine learning factor models",
       "Regime switching detection",

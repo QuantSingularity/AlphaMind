@@ -2,19 +2,15 @@ import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
+  Text as RNText,
   View,
 } from "react-native";
-import {
-  Button,
-  Snackbar,
-  Text,
-  TextInput,
-  useTheme,
-} from "react-native-paper";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
-import { clearError, loginUser } from "../store/slices/authSlice";
+import { loginUser } from "../store/slices/authSlice";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -25,7 +21,7 @@ export default function LoginScreen({ navigation }) {
   const [localError, setLocalError] = useState("");
 
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading } = useSelector((state) => state.auth);
   const theme = useTheme();
 
   const handleLogin = async () => {
@@ -45,13 +41,6 @@ export default function LoginScreen({ navigation }) {
     dispatch(loginUser({ email: email.trim(), password }));
   };
 
-  const handleDismissError = () => {
-    dispatch(clearError());
-    setLocalError("");
-  };
-
-  const displayError = localError || error;
-
   const styles = StyleSheet.create({
     outerContainer: {
       flex: 1,
@@ -62,7 +51,6 @@ export default function LoginScreen({ navigation }) {
       justifyContent: "center",
       padding: 24,
     },
-    // Brand block — matches web navbar logo "AlphaMind"
     brandBlock: {
       alignItems: "center",
       marginBottom: 40,
@@ -98,18 +86,11 @@ export default function LoginScreen({ navigation }) {
       color: theme.colors.onBackground,
       letterSpacing: -0.3,
     },
-    appNameBlue: {
-      fontSize: 26,
-      fontWeight: "800",
-      color: theme.colors.primary,
-      letterSpacing: -0.3,
-    },
     subtitle: {
       fontSize: 14,
       color: theme.colors.onSurfaceVariant,
       textAlign: "center",
     },
-    // Form card — matches web card style
     formCard: {
       backgroundColor: theme.colors.surface,
       borderRadius: 8,
@@ -135,13 +116,18 @@ export default function LoginScreen({ navigation }) {
       marginBottom: 14,
       backgroundColor: theme.colors.surface,
     },
-    // Primary button — matches web bg-blue-600 rounded-md
     primaryButton: {
       borderRadius: 6,
       marginTop: 4,
     },
     primaryButtonContent: {
       paddingVertical: 6,
+    },
+    errorText: {
+      color: theme.colors.error || "#DC2626",
+      fontSize: 13,
+      marginTop: 8,
+      textAlign: "center",
     },
     dividerRow: {
       flexDirection: "row",
@@ -182,16 +168,13 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.logoLetter}>α</Text>
           </View>
           <View style={styles.appNameRow}>
-            <Text style={styles.appNameDark}>Alpha</Text>
-            <Text style={styles.appNameBlue}>Mind</Text>
+            <Text style={styles.appNameDark}>AlphaMind</Text>
           </View>
           <Text style={styles.subtitle}>Sign in to your trading dashboard</Text>
         </View>
 
         {/* Form card */}
         <View style={styles.formCard}>
-          <Text style={styles.formLabel}>Sign In</Text>
-
           <TextInput
             label="Email address"
             value={email}
@@ -229,17 +212,37 @@ export default function LoginScreen({ navigation }) {
             testID="password-input"
           />
 
-          <Button
-            mode="contained"
+          <Pressable
             onPress={handleLogin}
-            loading={loading}
-            disabled={loading || !email || !password}
-            style={styles.primaryButton}
-            contentStyle={styles.primaryButtonContent}
-            buttonColor={theme.colors.primary}
+            disabled={loading || (!email && !password)}
           >
-            Get Started
-          </Button>
+            <View
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityState={{
+                disabled: loading || (!email && !password),
+              }}
+              style={[
+                styles.primaryButton,
+                {
+                  backgroundColor: theme.colors.primary,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 14,
+                  borderRadius: 6,
+                  opacity: loading || (!email && !password) ? 0.5 : 1,
+                },
+              ]}
+            >
+              <RNText
+                style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}
+              >
+                Sign In
+              </RNText>
+            </View>
+          </Pressable>
+
+          {!!localError && <Text style={styles.errorText}>{localError}</Text>}
 
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
@@ -258,15 +261,6 @@ export default function LoginScreen({ navigation }) {
             Create an Account
           </Button>
         </View>
-
-        <Snackbar
-          visible={!!displayError}
-          onDismiss={handleDismissError}
-          duration={4000}
-          action={{ label: "Dismiss", onPress: handleDismissError }}
-        >
-          {displayError}
-        </Snackbar>
       </ScrollView>
     </KeyboardAvoidingView>
   );

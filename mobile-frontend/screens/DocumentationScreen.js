@@ -89,6 +89,29 @@ const sections = [
       },
     ],
   },
+  {
+    title: "Examples & Tutorials",
+    items: [
+      {
+        title: "Backtesting Example",
+        description: "Walk through a complete backtest from data to results.",
+        icon: "📊",
+        url: "https://docs.alphamind.io/examples/backtest",
+      },
+      {
+        title: "Model Training Tutorial",
+        description: "Train and evaluate a TFT model on market data.",
+        icon: "🤖",
+        url: "https://docs.alphamind.io/examples/training",
+      },
+      {
+        title: "Factor Analysis",
+        description: "Decompose portfolio returns using factor analysis.",
+        icon: "🔬",
+        url: "https://docs.alphamind.io/examples/factors",
+      },
+    ],
+  },
 ];
 
 // Getting Started code block — matches web "Getting Started" section

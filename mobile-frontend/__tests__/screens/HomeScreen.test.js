@@ -7,6 +7,35 @@ import authReducer from "../../store/slices/authSlice";
 import portfolioReducer from "../../store/slices/portfolioSlice";
 import settingsReducer from "../../store/slices/settingsSlice";
 
+// Standalone mock — avoids jest.requireActual issues with toolkit/immer
+jest.mock("../../store/slices/portfolioSlice", () => {
+  const initialState = {
+    data: null,
+    performance: [],
+    holdings: [],
+    loading: false,
+    performanceLoading: false,
+    holdingsLoading: false,
+    error: null,
+    lastUpdated: null,
+  };
+  function portfolioReducer(state = initialState, action) {
+    if (action.type === "portfolio/clearError")
+      return { ...state, error: null };
+    if (action.type === "portfolio/resetPortfolio") return initialState;
+    return state;
+  }
+  return {
+    __esModule: true,
+    default: portfolioReducer,
+    fetchPortfolio: jest.fn(() => () => Promise.resolve()),
+    fetchPerformance: jest.fn(() => () => Promise.resolve()),
+    fetchHoldings: jest.fn(() => () => Promise.resolve()),
+    clearError: () => ({ type: "portfolio/clearError" }),
+    resetPortfolio: () => ({ type: "portfolio/resetPortfolio" }),
+  };
+});
+
 const mockPortfolioData = {
   value: 1250345.67,
   dailyPnL: 15678.9,

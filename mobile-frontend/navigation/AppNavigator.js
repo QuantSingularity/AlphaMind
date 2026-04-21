@@ -15,7 +15,7 @@ const SettingsRoute = () => <SettingsScreen />;
 const routes = [
   {
     key: "home",
-    title: "Dashboard",
+    title: "Home",
     focusedIcon: "view-dashboard",
     unfocusedIcon: "view-dashboard-outline",
   },

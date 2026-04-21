@@ -43,7 +43,8 @@ export default function HomeScreen() {
   const theme = useTheme();
   const dispatch = useDispatch();
 
-  const { data, loading, error } = useSelector((state) => state.portfolio);
+  const portfolioState = useSelector((state) => state.portfolio) ?? {};
+  const { data = null, loading = false, error = null } = portfolioState;
   const { user } = useSelector((state) => state.auth);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -69,7 +70,7 @@ export default function HomeScreen() {
         },
         {
           title: "Daily P&L",
-          value: "$0.00",
+          value: "+$0.00",
           change: "0.0%",
           changeColor: theme.colors.onSurfaceVariant,
           icon: "trending-up",
@@ -293,15 +294,16 @@ export default function HomeScreen() {
       {/* Hero Section — matches web hero */}
       <View style={styles.heroSection}>
         {user && (
-          <Text style={styles.greetingText}>
-            Welcome back, {user.name || user.email}
-          </Text>
+          <>
+            <Text style={styles.greetingText}>Welcome back, </Text>
+            <Text style={styles.greetingText}>{user.name || user.email}</Text>
+          </>
         )}
         <Text style={styles.titleText}>
           Trading <Text style={styles.titleAccent}>Dashboard</Text>
         </Text>
         <Text style={styles.subtitleText}>
-          Real-time portfolio monitoring and analytics
+          Real-time quantitative trading overview
         </Text>
       </View>
 
@@ -320,7 +322,7 @@ export default function HomeScreen() {
       {/* Performance Metrics Table — matches web table section */}
       <View style={styles.sectionAlt}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Performance Metrics</Text>
+          <Text style={styles.sectionTitle}>Performance</Text>
           <Text style={styles.sectionSubtitle}>
             Historical backtesting results across different strategies
           </Text>
