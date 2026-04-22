@@ -150,7 +150,7 @@ jobs:
   # Job 4 -- Mobile Frontend (Expo) Build & Test
   # ============================================================
   mobile_frontend:
-    name: Mobile Frontend Build
+    name: Mobile-Frontend Test & Build
     runs-on: ubuntu-latest
     needs: code_quality
 
