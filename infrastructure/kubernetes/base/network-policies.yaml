@@ -43,7 +43,7 @@ spec:
               app: alphamind-backend
       ports:
         - protocol: TCP
-          port: 8080
+          port: 8000 # corrected from 8080
     - to: []
       ports:
         - protocol: TCP
@@ -73,14 +73,24 @@ spec:
               app: alphamind-frontend
       ports:
         - protocol: TCP
-          port: 8080
+          port: 8000 # corrected from 8080
     - from:
         - podSelector:
             matchLabels:
               app: prometheus
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
       ports:
         - protocol: TCP
-          port: 8080
+          port: 8000 # corrected from 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
   egress:
     - to:
         - podSelector:
@@ -89,8 +99,6 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
-        - protocol: TCP
-          port: 5432
     - to:
         - podSelector:
             matchLabels:
@@ -128,8 +136,6 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
-        - protocol: TCP
-          port: 5432
     - from:
         - podSelector:
             matchLabels:
@@ -137,8 +143,6 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
-        - protocol: TCP
-          port: 5432
   egress:
     - to: []
       ports:
@@ -194,10 +198,6 @@ spec:
         - podSelector:
             matchLabels:
               app: grafana
-      ports:
-        - protocol: TCP
-          port: 9090
-    - from:
         - namespaceSelector:
             matchLabels:
               name: monitoring
@@ -209,7 +209,7 @@ spec:
         - podSelector: {}
       ports:
         - protocol: TCP
-          port: 8080
+          port: 8000 # corrected from 8080
         - protocol: TCP
           port: 9100
     - to: []
@@ -245,6 +245,35 @@ spec:
           port: 9200
         - protocol: TCP
           port: 443
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alphamind-influxdb-policy
+  namespace: alphamind-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: alphamind-influxdb
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: alphamind-backend
+      ports:
+        - protocol: TCP
+          port: 8086
+  egress:
+    - to: []
+      ports:
         - protocol: TCP
           port: 53
         - protocol: UDP

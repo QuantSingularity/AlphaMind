@@ -1,0 +1,98 @@
+---
+# InfluxDB 2.x — time-series database for market data, metrics, and tick data.
+# The README and tech stack table list InfluxDB as the time-series store;
+# this manifest was missing from the original K8s base.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: alphamind-influxdb
+  namespace: alphamind-prod
+  labels:
+    app: alphamind-influxdb
+    component: database
+spec:
+  serviceName: alphamind-influxdb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alphamind-influxdb
+  template:
+    metadata:
+      labels:
+        app: alphamind-influxdb
+    spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: alphamind-influxdb
+          image: influxdb:2.7-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8086
+              name: http
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+            requests:
+              cpu: "1"
+              memory: 2Gi
+          env:
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: setup
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              value: alphamind
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: alphamind-influxdb-secret
+                  key: admin-password
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: alphamind
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: market_data
+            - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: alphamind-influxdb-secret
+                  key: admin-token
+            - name: INFLUXD_STORAGE_WAL_FSYNC_DELAY
+              value: "0s"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8086
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8086
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: alphamind-influxdb-data
+              mountPath: /var/lib/influxdb2
+            - name: alphamind-influxdb-config
+              mountPath: /etc/influxdb2
+  volumeClaimTemplates:
+    - metadata:
+        name: alphamind-influxdb-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 50Gi
+    - metadata:
+        name: alphamind-influxdb-config
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi

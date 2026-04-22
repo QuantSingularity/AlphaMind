@@ -3,6 +3,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: alphamind-backend-pdb
+  namespace: alphamind-prod
 spec:
   minAvailable: 1
   selector:
@@ -14,6 +15,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: alphamind-frontend-pdb
+  namespace: alphamind-prod
 spec:
   minAvailable: 1
   selector:
@@ -25,6 +27,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: alphamind-database-pdb
+  namespace: alphamind-prod
 spec:
   minAvailable: 1
   selector:
@@ -36,6 +39,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: alphamind-redis-pdb
+  namespace: alphamind-prod
 spec:
   minAvailable: 1
   selector:

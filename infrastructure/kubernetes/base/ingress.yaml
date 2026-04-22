@@ -3,12 +3,23 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: alphamind-ingress
+  namespace: alphamind-prod
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    # Strip the /api prefix before forwarding to the backend service
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: DENY";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains";
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
@@ -20,13 +31,23 @@ spec:
     - host: alphamind.example.com
       http:
         paths:
-          - path: /api
+          # Backend API — passes full /api/... path to FastAPI
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: alphamind-backend
+                port:
+                  number: 80
+          # Health probe (K8s liveness checks hit this from outside the cluster)
+          - path: /health
             pathType: Prefix
             backend:
               service:
                 name: alphamind-backend
                 port:
                   number: 80
+          # All remaining paths → React SPA (must come last)
           - path: /
             pathType: Prefix
             backend:

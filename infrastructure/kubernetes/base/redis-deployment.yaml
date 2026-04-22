@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: alphamind-redis
+  namespace: alphamind-prod
   labels:
     app: alphamind-redis
 spec:
@@ -40,21 +41,36 @@ spec:
             capabilities:
               drop:
                 - ALL
+          # Password authentication — consistent with REDIS_AUTH_ENABLED: "true" in ConfigMap
           command:
             - redis-server
             - --appendonly
             - "yes"
             - --save
             - "60 1"
+            - --requirepass
+            - $(REDIS_PASSWORD)
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: alphamind-secrets
+                  key: redis-password
           livenessProbe:
             exec:
-              command: ["redis-cli", "ping"]
+              command:
+                - sh
+                - -c
+                - redis-cli -a "$REDIS_PASSWORD" ping
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             exec:
-              command: ["redis-cli", "ping"]
+              command:
+                - sh
+                - -c
+                - redis-cli -a "$REDIS_PASSWORD" ping
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 3

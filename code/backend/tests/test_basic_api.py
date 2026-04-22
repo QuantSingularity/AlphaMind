@@ -1,5 +1,5 @@
 """
-Basic API functionality tests.
+Basic API functionality tests — updated to match v2 API contracts.
 """
 
 from app.main import app
@@ -9,7 +9,6 @@ client = TestClient(app)
 
 
 def test_health_endpoint():
-    """Test the health check endpoint."""
     response = client.get("/health")
     assert response.status_code == 200
     data = response.json()
@@ -19,133 +18,142 @@ def test_health_endpoint():
 
 
 def test_root_endpoint():
-    """Test the root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "healthy"
+    assert response.json()["status"] == "healthy"
 
 
 def test_docs_available():
-    """Test that API documentation is available."""
     response = client.get("/docs")
     assert response.status_code == 200
 
 
 def test_openapi_schema():
-    """Test that OpenAPI schema is available."""
     response = client.get("/openapi.json")
     assert response.status_code == 200
     schema = response.json()
     assert "openapi" in schema
-    assert "info" in schema
     assert schema["info"]["title"] == "AlphaMind API"
 
 
 def test_trading_orders_endpoint():
-    """Test creating a trading order."""
+    """v2: field names are camelCase; status code is 201 Created."""
     order_data = {
-        "symbol": "AAPL",
+        "ticker": "AAPL",
+        "side": "BUY",
         "quantity": 100.0,
-        "order_type": "market",
+        "orderType": "MARKET",
         "price": None,
     }
     response = client.post("/api/v1/trading/orders", json=order_data)
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
-    assert "order_id" in data
-    assert data["symbol"] == "AAPL"
+    assert "id" in data
+    assert data["ticker"] == "AAPL"
     assert data["quantity"] == 100.0
     assert data["status"] == "pending"
 
 
 def test_get_orders_endpoint():
-    """Test retrieving all orders."""
     response = client.get("/api/v1/trading/orders")
     assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
+    assert isinstance(response.json(), list)
 
 
 def test_portfolio_endpoint():
-    """Test getting portfolio information."""
+    """v2: portfolio uses camelCase keys; no 'positions' at top level."""
     response = client.get("/api/v1/portfolio/")
     assert response.status_code == 200
     data = response.json()
-    assert "total_value" in data
+    assert "totalValue" in data
     assert "cash" in data
-    assert "positions" in data
-    assert isinstance(data["positions"], list)
+    assert "dailyPnL" in data
+    assert "allocation" in data
+    assert isinstance(data["allocation"], list)
+
+
+def test_portfolio_positions_endpoint():
+    """v2: positions are at /portfolio/positions."""
+    response = client.get("/api/v1/portfolio/positions")
+    assert response.status_code == 200
+    positions = response.json()
+    assert isinstance(positions, list)
+    assert len(positions) > 0
+    assert "ticker" in positions[0]
 
 
 def test_portfolio_performance_endpoint():
-    """Test getting portfolio performance."""
+    """v2: performance returns equityCurve + metrics object."""
     response = client.get("/api/v1/portfolio/performance")
     assert response.status_code == 200
     data = response.json()
-    assert "daily_return" in data
-    assert "total_return" in data
-    assert "sharpe_ratio" in data
-    assert "max_drawdown" in data
+    assert "equityCurve" in data
+    assert "metrics" in data
+    assert "sharpeRatio" in data["metrics"]
+    assert "maxDrawdown" in data["metrics"]
 
 
 def test_market_data_quote_endpoint():
-    """Test getting market data quote."""
+    """v2: uses 'ticker' and 'last' instead of 'symbol' and 'price'."""
     response = client.get("/api/v1/market-data/quote/AAPL")
     assert response.status_code == 200
     data = response.json()
-    assert data["symbol"] == "AAPL"
-    assert "price" in data
+    assert data["ticker"] == "AAPL"
+    assert "last" in data
     assert "volume" in data
     assert "timestamp" in data
 
 
 def test_market_data_historical_endpoint():
-    """Test getting historical market data."""
+    """v2: returns a list of OHLCV records directly."""
     response = client.get("/api/v1/market-data/historical/AAPL?days=30")
     assert response.status_code == 200
     data = response.json()
-    assert data["symbol"] == "AAPL"
-    assert "data" in data
-    assert isinstance(data["data"], list)
+    assert isinstance(data, list)
+    assert len(data) == 30
+    assert "timestamp" in data[0]
+    assert "close" in data[0]
 
 
 def test_strategies_endpoint():
-    """Test getting trading strategies."""
     response = client.get("/api/v1/strategies/")
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
+    assert len(data) > 0
 
 
 def test_backtest_endpoint():
-    """Test running a backtest."""
+    """v2: backtest is at /api/v1/backtest/ — dedicated router."""
     backtest_data = {
-        "strategy_id": "test_strategy",
-        "start_date": "2023-01-01T00:00:00",
-        "end_date": "2023-12-31T00:00:00",
-        "initial_capital": 100000.0,
+        "strategyId": "strat-001",
+        "startDate": "2023-01-01",
+        "endDate": "2023-12-31",
+        "initialCapital": 100000.0,
     }
-    response = client.post("/api/v1/strategies/backtest", json=backtest_data)
+    response = client.post("/api/v1/backtest/", json=backtest_data)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["strategyId"] == "strat-001"
+    assert "totalReturn" in data
+    assert "sharpeRatio" in data
+    assert "maxDrawdown" in data
+    assert "totalTrades" in data
+
+
+def test_risk_metrics_endpoint():
+    response = client.get("/api/v1/risk/metrics")
     assert response.status_code == 200
     data = response.json()
-    assert data["strategy_id"] == "test_strategy"
-    assert "total_return" in data
-    assert "sharpe_ratio" in data
-    assert "max_drawdown" in data
-    assert "trades" in data
+    assert "var" in data
+    assert "sharpeRatio" in data
 
 
 def test_invalid_endpoint():
-    """Test that invalid endpoints return 404."""
     response = client.get("/api/v1/invalid/endpoint")
     assert response.status_code == 404
 
 
 def test_cors_headers():
-    """Test that CORS middleware is configured."""
-    # Note: TestClient doesn't trigger CORS middleware
-    # In a real environment, CORS headers would be present
-    # This test verifies the endpoint works without errors
     response = client.get("/health")
     assert response.status_code == 200

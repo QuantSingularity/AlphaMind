@@ -1,5 +1,5 @@
 """
-Tests for AlphaMind API endpoints.
+Tests for AlphaMind API endpoints — updated to match v2 API contracts.
 """
 
 import os
@@ -7,7 +7,6 @@ import sys
 
 from fastapi.testclient import TestClient
 
-# Add backend to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.main import app
@@ -16,10 +15,7 @@ client = TestClient(app)
 
 
 class TestHealthEndpoints:
-    """Test health check endpoints."""
-
     def test_health_check(self):
-        """Test health check endpoint."""
         response = client.get("/health")
         assert response.status_code == 200
         data = response.json()
@@ -28,7 +24,6 @@ class TestHealthEndpoints:
         assert "version" in data
 
     def test_root_endpoint(self):
-        """Test root endpoint."""
         response = client.get("/")
         assert response.status_code == 200
         data = response.json()
@@ -36,107 +31,163 @@ class TestHealthEndpoints:
 
 
 class TestTradingEndpoints:
-    """Test trading endpoints."""
-
     def test_create_order(self):
-        """Test order creation."""
+        """Order creation — uses camelCase field names matching TypeScript types."""
         order_data = {
-            "symbol": "AAPL",
-            "quantity": 100,
-            "order_type": "market",
+            "ticker": "AAPL",
+            "side": "BUY",
+            "quantity": 100.0,
+            "orderType": "MARKET",
             "price": None,
         }
         response = client.post("/api/v1/trading/orders", json=order_data)
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
-        assert "order_id" in data
-        assert data["symbol"] == "AAPL"
-        assert data["quantity"] == 100
+        assert "id" in data
+        assert data["ticker"] == "AAPL"
+        assert data["quantity"] == 100.0
         assert data["status"] == "pending"
 
     def test_get_orders(self):
-        """Test getting all orders."""
         response = client.get("/api/v1/trading/orders")
         assert response.status_code == 200
-        data = response.json()
-        assert isinstance(data, list)
+        assert isinstance(response.json(), list)
 
     def test_get_order_not_found(self):
-        """Test getting non-existent order."""
         response = client.get("/api/v1/trading/orders/invalid-id")
         assert response.status_code == 404
 
 
 class TestPortfolioEndpoints:
-    """Test portfolio endpoints."""
-
     def test_get_portfolio(self):
-        """Test getting portfolio."""
         response = client.get("/api/v1/portfolio/")
         assert response.status_code == 200
         data = response.json()
-        assert "total_value" in data
+        # v2 API uses camelCase keys matching the TypeScript Portfolio interface
+        assert "totalValue" in data
         assert "cash" in data
-        assert "positions" in data
-        assert isinstance(data["positions"], list)
+        assert "dailyPnL" in data
+        assert "totalPnL" in data
+        assert "allocation" in data
+        assert isinstance(data["allocation"], list)
 
     def test_get_performance(self):
-        """Test getting portfolio performance."""
         response = client.get("/api/v1/portfolio/performance")
         assert response.status_code == 200
         data = response.json()
-        assert "daily_return" in data
-        assert "total_return" in data
-        assert "sharpe_ratio" in data
-        assert "max_drawdown" in data
+        # v2 performance endpoint returns equityCurve + metrics object
+        assert "equityCurve" in data
+        assert "metrics" in data
+        metrics = data["metrics"]
+        assert "sharpeRatio" in metrics
+        assert "maxDrawdown" in metrics
+        assert "annualisedReturn" in metrics
+        assert "volatility" in metrics
+
+    def test_get_positions(self):
+        response = client.get("/api/v1/portfolio/positions")
+        assert response.status_code == 200
+        positions = response.json()
+        assert isinstance(positions, list)
+        assert len(positions) > 0
+        pos = positions[0]
+        assert "id" in pos
+        assert "ticker" in pos
+        assert "quantity" in pos
+        assert "unrealizedPnL" in pos
 
 
 class TestMarketDataEndpoints:
-    """Test market data endpoints."""
-
     def test_get_quote(self):
-        """Test getting quote for symbol."""
         response = client.get("/api/v1/market-data/quote/AAPL")
         assert response.status_code == 200
         data = response.json()
-        assert data["symbol"] == "AAPL"
-        assert "price" in data
+        # v2 uses 'ticker' not 'symbol', and 'last' not 'price'
+        assert data["ticker"] == "AAPL"
+        assert "last" in data
         assert "volume" in data
         assert "timestamp" in data
 
     def test_get_historical_data(self):
-        """Test getting historical data."""
         response = client.get("/api/v1/market-data/historical/AAPL?days=30")
         assert response.status_code == 200
         data = response.json()
-        assert data["symbol"] == "AAPL"
-        assert "data" in data
-        assert isinstance(data["data"], list)
+        # v2 returns a list of OHLCV records directly
+        assert isinstance(data, list)
+        assert len(data) == 30
+        record = data[0]
+        assert "timestamp" in record
+        assert "open" in record
+        assert "high" in record
+        assert "low" in record
+        assert "close" in record
+        assert "volume" in record
 
 
 class TestStrategyEndpoints:
-    """Test strategy endpoints."""
-
     def test_get_strategies(self):
-        """Test getting all strategies."""
         response = client.get("/api/v1/strategies/")
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
+        assert len(data) > 0
+        s = data[0]
+        assert "id" in s
+        assert "name" in s
+        assert "performance" in s
 
     def test_run_backtest(self):
-        """Test running backtest."""
+        """Backtest is a dedicated endpoint at /api/v1/backtest/ in v2."""
         backtest_data = {
-            "strategy_id": "momentum-v1",
-            "start_date": "2023-01-01T00:00:00",
-            "end_date": "2023-12-31T00:00:00",
-            "initial_capital": 100000.0,
+            "strategyId": "strat-001",
+            "startDate": "2023-01-01",
+            "endDate": "2023-12-31",
+            "initialCapital": 100000.0,
         }
-        response = client.post("/api/v1/strategies/backtest", json=backtest_data)
+        response = client.post("/api/v1/backtest/", json=backtest_data)
+        assert response.status_code == 201
+        data = response.json()
+        assert data["strategyId"] == "strat-001"
+        assert "totalReturn" in data
+        assert "sharpeRatio" in data
+        assert "maxDrawdown" in data
+        assert "totalTrades" in data
+
+
+class TestRiskEndpoints:
+    def test_get_risk_metrics(self):
+        response = client.get("/api/v1/risk/metrics")
         assert response.status_code == 200
         data = response.json()
-        assert data["strategy_id"] == "momentum-v1"
-        assert "total_return" in data
-        assert "sharpe_ratio" in data
-        assert "max_drawdown" in data
-        assert "trades" in data
+        assert "var" in data
+        assert "cvar" in data
+        assert "sharpeRatio" in data
+        assert "maxDrawdown" in data
+
+    def test_get_stress_scenarios(self):
+        response = client.get("/api/v1/risk/stress-scenarios")
+        assert response.status_code == 200
+        scenarios = response.json()
+        assert isinstance(scenarios, list)
+        assert len(scenarios) > 0
+
+    def test_get_correlation_matrix(self):
+        response = client.get("/api/v1/risk/correlation-matrix")
+        assert response.status_code == 200
+        matrix = response.json()
+        assert isinstance(matrix, list)
+        assert len(matrix) > 0
+
+
+class TestAlternativeDataEndpoints:
+    def test_get_sources(self):
+        response = client.get("/api/v1/alternative-data/sources")
+        assert response.status_code == 200
+        sources = response.json()
+        assert isinstance(sources, list)
+        assert len(sources) > 0
+        src = sources[0]
+        assert "id" in src
+        assert "name" in src
+        assert "type" in src
+        assert "status" in src

@@ -36,41 +36,33 @@ pyyaml>=6.0.1,<7.0.0
 python-dateutil>=2.8.2
 pytz>=2024.0
 
-# Deep Learning (optional — install only if needed)
+# Database drivers (MySQL used in docker-compose & K8s)
+PyMySQL>=1.1.0,<2.0.0
+cryptography>=41.0.0  # required by PyMySQL for SSL support
+SQLAlchemy>=2.0.0,<3.0.0
+alembic>=1.12.0,<2.0.0
+
+# Deep Learning — required by ai_models package
+torch>=2.0.0,<3.0.0
 tensorflow>=2.15.0,<2.17.0
-# torch>=2.0.0
-# stable-baselines3>=2.0.0
 
-# Reinforcement learning / ML extras (optional)
-# gym>=0.26.0
-# pymc>=5.0.0
-# arviz>=0.16.0
+# Reinforcement learning
+gymnasium>=0.29.0,<1.0.0
+stable-baselines3>=2.0.0,<3.0.0
 
-# Quantitative finance (optional)
-# QuantLib>=1.31
+# Probabilistic programming (BayesianVaR)
+pymc>=5.0.0,<6.0.0
+arviz>=0.16.0,<1.0.0
+pytensor>=2.18.0,<3.0.0
 
-# Data streaming (optional)
-# confluent-kafka>=2.0.0
-# kafka-python>=2.0.2
+# Quantitative finance
+QuantLib>=1.31
 
-# Cloud infrastructure (optional)
-# google-cloud-aiplatform>=1.40.0
+# Redis client
+redis[hiredis]>=5.0.0,<6.0.0
 
-# Database (optional — uncomment as needed)
-# SQLAlchemy>=2.0.0
-# psycopg2-binary>=2.9.0
-# redis>=5.0.0
-# pymysql>=1.1.0
-
-# Alternative data (optional)
-# sentinelhub>=3.9.0
-# sec-edgar-downloader>=5.0.0
-
-# Development & testing tools
+# Testing
 pytest>=7.4.0,<9.0.0
 pytest-asyncio>=0.23.0,<1.0.0
 pytest-cov>=4.1.0,<6.0.0
-httpx>=0.25.0  # required for fastapi TestClient
-black>=23.0.0,<25.0.0
-flake8>=6.0.0,<8.0.0
-mypy>=1.4.0,<2.0.0
+httpx>=0.25.0   # for TestClient

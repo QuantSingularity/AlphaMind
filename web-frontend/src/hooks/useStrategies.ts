@@ -82,3 +82,12 @@ export const useDeactivateStrategy = () => {
     },
   });
 };
+
+export const useStrategyEquityCurve = (id: string) => {
+  return useQuery({
+    queryKey: ["strategy-equity-curve", id],
+    queryFn: () => apiService.getStrategyEquityCurve(id),
+    enabled: !!id,
+    staleTime: 60_000,
+  });
+};

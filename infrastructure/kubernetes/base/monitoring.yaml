@@ -3,6 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: alphamind-backend-monitor
+  namespace: alphamind-prod
   labels:
     app: alphamind-backend
     release: prometheus
@@ -21,6 +22,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: alphamind-alerts
+  namespace: alphamind-prod
   labels:
     app: alphamind
     release: prometheus
@@ -36,6 +38,7 @@ spec:
           annotations:
             summary: "AlphaMind backend is down"
             description: "Backend has been down for more than 1 minute."
+
         - alert: HighErrorRate
           expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
           for: 2m
@@ -44,14 +47,18 @@ spec:
           annotations:
             summary: "High error rate on backend"
             description: "Error rate is above 5% for 2 minutes."
+
         - alert: HighMemoryUsage
-          expr: container_memory_usage_bytes{pod=~"alphamind-backend.*"} / container_spec_memory_limit_bytes > 0.85
+          expr: >
+            container_memory_usage_bytes{pod=~"alphamind-backend.*"}
+            / container_spec_memory_limit_bytes > 0.85
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "High memory usage on backend pod"
             description: "Memory usage is above 85% of limit."
+
         - alert: DatabaseConnectionFailure
           expr: alphamind_db_connections_failed_total > 0
           for: 1m
@@ -60,3 +67,71 @@ spec:
           annotations:
             summary: "Database connection failures detected"
             description: "AlphaMind backend is failing to connect to the database."
+
+        - alert: HighCPUUsage
+          expr: >
+            rate(container_cpu_usage_seconds_total{pod=~"alphamind-backend.*"}[5m])
+            / container_spec_cpu_quota * container_spec_cpu_period > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on backend pod"
+            description: "CPU usage is above 85% of limit for 5 minutes."
+
+        - alert: PodCrashLooping
+          expr: >
+            rate(kube_pod_container_status_restarts_total{
+              namespace="alphamind-prod"
+            }[15m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod is crash-looping"
+            description: "A pod in alphamind-prod has restarted more than once in 15 minutes."
+
+---
+# Grafana Dashboard ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alphamind-grafana-dashboard
+  namespace: alphamind-prod
+  labels:
+    grafana_dashboard: "1"
+data:
+  alphamind-dashboard.json: |
+    {
+      "title": "AlphaMind Platform",
+      "uid": "alphamind-main",
+      "panels": [
+        {
+          "title": "Request Rate",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "rate(http_requests_total{job=\"alphamind-backend\"}[5m])"
+            }
+          ]
+        },
+        {
+          "title": "Error Rate",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "rate(http_requests_total{job=\"alphamind-backend\",status=~\"5..\"}[5m])"
+            }
+          ]
+        },
+        {
+          "title": "P99 Latency",
+          "type": "graph",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"alphamind-backend\"}[5m]))"
+            }
+          ]
+        }
+      ]
+    }

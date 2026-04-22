@@ -5,21 +5,24 @@ resources:
   - namespace.yaml
   - app-configmap.yaml
   - app-secrets.yaml
+  - influxdb-secret.yaml
   - backend-deployment.yaml
   - backend-service.yaml
   - database-statefulset.yaml
   - database-service.yaml
+  - influxdb-statefulset.yaml
+  - influxdb-service.yaml
   - frontend-deployment.yaml
   - frontend-service.yaml
-  - hpa.yaml
-  - ingress.yaml
-  - monitoring.yaml
-  - network-policies.yaml
-  - pdb.yaml
-  - rbac.yaml
   - redis-deployment.yaml
   - redis-pvc.yaml
   - redis-service.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - ingress.yaml
+  - monitoring.yaml
+  - network-policies.yaml
+  - rbac.yaml
 
 commonLabels:
   app.kubernetes.io/name: alphamind

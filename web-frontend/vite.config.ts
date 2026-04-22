@@ -1,21 +1,25 @@
-import path from "node:path";
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
   server: {
     port: 3000,
-    host: true,
+    proxy: {
+      // Proxy all /api/* and /health requests to the FastAPI backend in dev
+      "/api": {
+        target: process.env.VITE_API_BASE_URL || "http://localhost:8000",
+        changeOrigin: true,
+      },
+      "/health": {
+        target: process.env.VITE_API_BASE_URL || "http://localhost:8000",
+        changeOrigin: true,
+      },
+    },
   },
-  preview: {
-    port: 3000,
-    host: true,
+  build: {
+    outDir: "dist",
+    sourcemap: true,
   },
 });

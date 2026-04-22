@@ -1,50 +1,14 @@
-import { API_ENDPOINTS, ENABLE_MOCK_DATA } from "../constants/config";
+import { API_ENDPOINTS } from "../constants/config";
 import api from "./api";
 
-// Mock research data
-const mockResearchPapers = [
-  {
-    id: "1",
-    title: "Deep Learning for Market Prediction",
-    summary:
-      "Exploring the efficacy of LSTM networks in forecasting short-term market movements.",
-    authors: ["Dr. John Smith", "Dr. Jane Doe"],
-    date: "2025-11-15",
-    category: "Machine Learning",
-    url: "https://example.com/paper1.pdf",
-  },
-  {
-    id: "2",
-    title: "Factor Investing with Alternative Data",
-    summary:
-      "A study on integrating satellite imagery data into quantitative investment strategies.",
-    authors: ["Dr. Alice Johnson"],
-    date: "2025-10-20",
-    category: "Alternative Data",
-    url: "https://example.com/paper2.pdf",
-  },
-  {
-    id: "3",
-    title: "High-Frequency Trading Algorithms",
-    summary:
-      "Analysis of optimal execution strategies in volatile market conditions.",
-    authors: ["Dr. Bob Wilson", "Dr. Carol Brown"],
-    date: "2025-09-10",
-    category: "Execution",
-    url: "https://example.com/paper3.pdf",
-  },
-];
-
 export const researchService = {
+  // ── Research papers (legacy endpoints kept for backward compat) ──────────
+
   /**
-   * Get list of research papers
+   * Get research papers with optional filters.
+   * Uses the legacy /api/research/papers path that the existing test suite covers.
    */
   getPapers: async (filters = {}) => {
-    if (ENABLE_MOCK_DATA) {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockResearchPapers), 500);
-      });
-    }
     const response = await api.get(API_ENDPOINTS.RESEARCH.PAPERS, {
       params: filters,
     });
@@ -52,16 +16,56 @@ export const researchService = {
   },
 
   /**
-   * Get research paper details
+   * Get a single research paper by ID.
    */
   getPaperDetails: async (id) => {
-    if (ENABLE_MOCK_DATA) {
-      return new Promise((resolve) => {
-        const paper = mockResearchPapers.find((p) => p.id === id);
-        setTimeout(() => resolve(paper || null), 500);
-      });
-    }
     const response = await api.get(API_ENDPOINTS.RESEARCH.DETAILS(id));
+    return response.data;
+  },
+
+  // ── Alternative data (v1 endpoints) ─────────────────────────────────────
+
+  getAlternativeDataSources: async () => {
+    const response = await api.get(API_ENDPOINTS.ALTERNATIVE_DATA.SOURCES);
+    return response.data;
+  },
+
+  getAlternativeData: async (sourceId, params = {}) => {
+    const response = await api.get(
+      API_ENDPOINTS.ALTERNATIVE_DATA.DATA(sourceId),
+      { params },
+    );
+    return response.data;
+  },
+
+  // ── Risk ─────────────────────────────────────────────────────────────────
+
+  getRiskMetrics: async () => {
+    const response = await api.get(API_ENDPOINTS.RISK.METRICS);
+    return response.data;
+  },
+
+  getStressScenarios: async () => {
+    const response = await api.get(API_ENDPOINTS.RISK.STRESS);
+    return response.data;
+  },
+
+  // ── Strategies ───────────────────────────────────────────────────────────
+
+  getStrategies: async () => {
+    const response = await api.get(API_ENDPOINTS.STRATEGIES.LIST);
+    return response.data;
+  },
+
+  // ── Backtest ─────────────────────────────────────────────────────────────
+
+  runBacktest: async (strategyId, startDate, endDate, initialCapital) => {
+    const response = await api.post(API_ENDPOINTS.BACKTEST.RUN, {
+      strategyId,
+      startDate,
+      endDate,
+      initialCapital,
+    });
     return response.data;
   },
 };

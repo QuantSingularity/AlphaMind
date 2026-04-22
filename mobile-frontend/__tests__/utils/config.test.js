@@ -29,11 +29,13 @@ describe("config constants", () => {
     expect(API_ENDPOINTS.AUTH).toHaveProperty("REGISTER");
     expect(API_ENDPOINTS.AUTH).toHaveProperty("LOGOUT");
     expect(API_ENDPOINTS.PORTFOLIO).toHaveProperty("LIST");
+    // RESEARCH section restored for backward compat
     expect(API_ENDPOINTS.RESEARCH).toHaveProperty("PAPERS");
   });
 
   it("PORTFOLIO.DETAILS returns correct URL with id", () => {
     const { API_ENDPOINTS } = require("../../constants/config");
+    // Legacy path — no /v1/ prefix, kept for backward compat
     expect(API_ENDPOINTS.PORTFOLIO.DETAILS("abc123")).toBe(
       "/api/portfolio/abc123",
     );
@@ -54,6 +56,7 @@ describe("config constants", () => {
   it("STRATEGIES endpoints have correct shape", () => {
     const { API_ENDPOINTS } = require("../../constants/config");
     expect(API_ENDPOINTS.STRATEGIES).toHaveProperty("LIST");
+    // Legacy paths without /v1/ kept for backward compat
     expect(API_ENDPOINTS.STRATEGIES.DETAILS("s1")).toBe("/api/strategies/s1");
     expect(API_ENDPOINTS.STRATEGIES.PERFORMANCE("s1")).toBe(
       "/api/strategies/s1/performance",
@@ -63,6 +66,18 @@ describe("config constants", () => {
   it("MARKET endpoints exist", () => {
     const { API_ENDPOINTS } = require("../../constants/config");
     expect(API_ENDPOINTS.MARKET).toHaveProperty("QUOTES");
+    // CHART endpoint restored
     expect(API_ENDPOINTS.MARKET).toHaveProperty("CHART");
+  });
+
+  it("v1 portfolio list uses /api/v1/ prefix", () => {
+    const { API_ENDPOINTS } = require("../../constants/config");
+    expect(API_ENDPOINTS.PORTFOLIO.LIST).toBe("/api/v1/portfolio/");
+  });
+
+  it("BACKTEST endpoints exist", () => {
+    const { API_ENDPOINTS } = require("../../constants/config");
+    expect(API_ENDPOINTS.BACKTEST).toHaveProperty("RUN");
+    expect(API_ENDPOINTS.BACKTEST.RESULTS("s1")).toBe("/api/v1/backtest/s1");
   });
 });

@@ -14,6 +14,10 @@ spec:
     metadata:
       labels:
         app: alphamind-backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: alphamind-service-account
       securityContext:
@@ -25,14 +29,16 @@ spec:
           image: alphamind/backend:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - containerPort: 8000 # FastAPI / uvicorn default
+              name: http
+              protocol: TCP
           resources:
             limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
               cpu: 500m
               memory: 512Mi
-            requests:
-              cpu: 250m
-              memory: 256Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -40,8 +46,11 @@ spec:
               drop:
                 - ALL
           env:
-            - name: NODE_ENV
+            # Python/FastAPI environment variable (not NODE_ENV)
+            - name: ENVIRONMENT
               value: production
+            - name: API_PORT
+              value: "8000"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -62,18 +71,28 @@ spec:
                 configMapKeyRef:
                   name: alphamind-config
                   key: REDIS_PORT
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: alphamind-config
+                  key: LOG_LEVEL
+            - name: CORS_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: alphamind-config
+                  key: ALLOWED_ORIGINS
           livenessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: 8000
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
-              port: 8080
-            initialDelaySeconds: 5
+              port: 8000
+            initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 3
           volumeMounts:

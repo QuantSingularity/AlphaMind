@@ -24,7 +24,7 @@ class PortfolioOptimizer:
     """
 
     def __init__(
-        self, n_assets: Any, lookback_window: Any = 60, hidden_units: Any = 64
+        self, n_assets: int, lookback_window: int = 60, hidden_units: int = 64
     ) -> None:
         self.n_assets = n_assets
         self.lookback_window = lookback_window
