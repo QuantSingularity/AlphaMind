@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text as RNText,
@@ -212,35 +211,29 @@ export default function LoginScreen({ navigation }) {
             testID="password-input"
           />
 
-          <Pressable
-            onPress={handleLogin}
-            disabled={loading || (!email && !password)}
+          <View
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: loading || (!email && !password) }}
+            style={[
+              styles.primaryButton,
+              {
+                backgroundColor: theme.colors.primary,
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 14,
+                borderRadius: 6,
+                opacity: loading || (!email && !password) ? 0.5 : 1,
+              },
+            ]}
           >
-            <View
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityState={{
-                disabled: loading || (!email && !password),
-              }}
-              style={[
-                styles.primaryButton,
-                {
-                  backgroundColor: theme.colors.primary,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 14,
-                  borderRadius: 6,
-                  opacity: loading || (!email && !password) ? 0.5 : 1,
-                },
-              ]}
+            <RNText
+              onPress={handleLogin}
+              style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}
             >
-              <RNText
-                style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}
-              >
-                Sign In
-              </RNText>
-            </View>
-          </Pressable>
+              Sign In
+            </RNText>
+          </View>
 
           {!!localError && <Text style={styles.errorText}>{localError}</Text>}
 

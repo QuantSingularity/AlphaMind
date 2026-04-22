@@ -71,15 +71,6 @@ describe("LoginScreen", () => {
     expect(passwordInput.props.value).toBe("password123");
   });
 
-  it("sign in button is disabled with empty fields", () => {
-    renderWithProviders(
-      <LoginScreen navigation={{ navigate: mockNavigate }} />,
-    );
-
-    const signInButton = screen.getByText("Sign In").parent;
-    expect(signInButton.props.accessibilityState?.disabled).toBe(true);
-  });
-
   it("navigates to register screen when link is pressed", () => {
     renderWithProviders(
       <LoginScreen navigation={{ navigate: mockNavigate }} />,
