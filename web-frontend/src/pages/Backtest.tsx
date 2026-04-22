@@ -2,7 +2,6 @@ import type React from "react";
 import { useState } from "react";
 import {
   Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -57,7 +56,7 @@ export const Backtest: React.FC = () => {
       endDate: config.endDate,
       initialCapital: config.initialCapital,
     });
-    setResult(res as BacktestResult & { equityCurve?: unknown[] });
+    setResult(res as BacktestResult & { equityCurve?: Array<unknown> });
   };
 
   const equityCurve =

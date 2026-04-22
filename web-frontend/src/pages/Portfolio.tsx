@@ -196,7 +196,7 @@ export const Portfolio: React.FC = () => {
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
-                  data={allocation}
+                  data={allocation as unknown as Record<string, unknown>[]}
                   cx="50%"
                   cy="50%"
                   outerRadius={100}

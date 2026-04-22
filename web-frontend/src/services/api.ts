@@ -2,7 +2,6 @@ import axios, { type AxiosError, type AxiosInstance } from "axios";
 import type {
   AlternativeDataSource,
   ApiError,
-  ApiResponse,
   BacktestResult,
   MarketData,
   Order,
