@@ -210,3 +210,201 @@ def cache_function(ttl_seconds: float = 3600, namespace: str = "function"):
         return wrapper
 
     return decorator
+
+
+# ---------------------------------------------------------------------------
+# Concrete cache backends required by data_processing/__init__.py
+# ---------------------------------------------------------------------------
+
+
+class MemoryCache:
+    """
+    Thread-safe in-memory cache backed by a dict.
+
+    Parameters
+    ----------
+    policy : CachePolicy
+        Eviction / validity policy (default: 1-hour TTL).
+    max_entries : int
+        Maximum number of entries before LRU eviction.
+    """
+
+    def __init__(
+        self,
+        policy: Optional[CachePolicy] = None,
+        max_entries: int = 10_000,
+    ) -> None:
+        self._policy = policy or TTLCachePolicy(ttl_seconds=3600)
+        self._max_entries = max_entries
+        self._store: Dict[str, Any] = {}
+        self._timestamps: Dict[str, float] = {}
+
+    def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+        """Return cached value or *default* on miss/expiry."""
+        if key not in self._store:
+            return default
+        if not self._policy.is_valid(self._timestamps[key]):
+            del self._store[key]
+            del self._timestamps[key]
+            return default
+        return self._store[key]
+
+    def set(self, key: str, value: Any) -> bool:
+        """Store *value* under *key*. Returns True on success."""
+        if not self._policy.should_cache(key, value):
+            return False
+        if len(self._store) >= self._max_entries:
+            oldest = min(self._timestamps, key=self._timestamps.__getitem__)
+            del self._store[oldest]
+            del self._timestamps[oldest]
+        self._store[key] = value
+        self._timestamps[key] = time.time()
+        return True
+
+    def delete(self, key: str) -> bool:
+        """Remove *key*. Returns True if it existed."""
+        if key in self._store:
+            del self._store[key]
+            del self._timestamps[key]
+            return True
+        return False
+
+    def clear(self) -> None:
+        """Evict all entries."""
+        self._store.clear()
+        self._timestamps.clear()
+
+    def __len__(self) -> int:
+        return len(self._store)
+
+
+class DiskCache:
+    """
+    Pickle-based persistent disk cache.
+
+    Parameters
+    ----------
+    cache_dir : str
+        Directory where cache files are stored.
+    policy    : CachePolicy
+        Eviction / validity policy (default: 24-hour TTL).
+    """
+
+    import os as _os
+
+    def __init__(
+        self,
+        cache_dir: str = "/tmp/alphamind_cache",
+        policy: Optional[CachePolicy] = None,
+    ) -> None:
+        import os
+
+        self._cache_dir = cache_dir
+        os.makedirs(cache_dir, exist_ok=True)
+        self._policy = policy or TTLCachePolicy(ttl_seconds=86400)
+        self._timestamps: Dict[str, float] = {}
+
+    def _path(self, key: str) -> str:
+        import os
+
+        safe = hashlib.md5(key.encode()).hexdigest()
+        return os.path.join(self._cache_dir, f"{safe}.pkl")
+
+    def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+        import os
+
+        path = self._path(key)
+        if not os.path.exists(path):
+            return default
+        ts = self._timestamps.get(key, os.path.getmtime(path))
+        if not self._policy.is_valid(ts):
+            os.remove(path)
+            return default
+        try:
+            with open(path, "rb") as fh:
+                return pickle.load(fh)
+        except Exception:
+            return default
+
+    def set(self, key: str, value: Any) -> bool:
+        if not self._policy.should_cache(key, value):
+            return False
+        try:
+            with open(self._path(key), "wb") as fh:
+                pickle.dump(value, fh)
+            self._timestamps[key] = time.time()
+            return True
+        except Exception:
+            return False
+
+    def delete(self, key: str) -> bool:
+        import os
+
+        path = self._path(key)
+        if os.path.exists(path):
+            os.remove(path)
+            self._timestamps.pop(key, None)
+            return True
+        return False
+
+    def clear(self) -> None:
+        import os
+
+        for f in os.listdir(self._cache_dir):
+            if f.endswith(".pkl"):
+                os.remove(os.path.join(self._cache_dir, f))
+        self._timestamps.clear()
+
+
+class RedisCache:
+    """
+    Redis-backed cache (requires ``redis`` package at runtime).
+
+    The class is importable without Redis installed; a ``ConnectionError``
+    is raised only when ``connect()`` or a cache operation is attempted.
+    """
+
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        ttl_seconds: int = 3600,
+    ) -> None:
+        self._host = host
+        self._port = port
+        self._db = db
+        self._ttl = ttl_seconds
+        self._client: Optional[Any] = None
+
+    def _get_client(self) -> Any:
+        if self._client is None:
+            try:
+                import redis
+
+                self._client = redis.Redis(
+                    host=self._host, port=self._port, db=self._db
+                )
+            except ImportError as exc:
+                raise ImportError(
+                    "Install the 'redis' package to use RedisCache: pip install redis"
+                ) from exc
+        return self._client
+
+    def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+        raw = self._get_client().get(key)
+        if raw is None:
+            return default
+        return pickle.loads(raw)
+
+    def set(self, key: str, value: Any) -> bool:
+        self._get_client().setex(key, self._ttl, pickle.dumps(value))
+        return True
+
+    def delete(self, key: str) -> bool:
+        return bool(self._get_client().delete(key))
+
+    def clear(self, pattern: str = "*") -> None:
+        client = self._get_client()
+        for k in client.scan_iter(pattern):
+            client.delete(k)

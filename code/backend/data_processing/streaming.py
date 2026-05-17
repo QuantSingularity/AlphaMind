@@ -914,3 +914,58 @@ class StreamingPipeline:
             if stage_name == name:
                 return processor
         return None
+
+
+# ---------------------------------------------------------------------------
+# Public aliases required by data_processing/__init__.py
+# ---------------------------------------------------------------------------
+
+#: Alias — DataStreamProcessor is the public name for StreamProcessor.
+DataStreamProcessor = StreamProcessor
+
+#: Alias — KafkaStreamProcessor is the public name for KafkaStreamAdapter.
+KafkaStreamProcessor = KafkaStreamAdapter
+
+#: Alias — WebSocketStreamProcessor is the public name for WebSocketStreamAdapter.
+WebSocketStreamProcessor = WebSocketStreamAdapter
+
+
+class StreamAggregator:
+    """
+    Aggregates multiple :class:`StreamProcessor` outputs into a single stream.
+
+    Parameters
+    ----------
+    processors : list of StreamProcessor
+        Source processors whose outputs are merged.
+    """
+
+    def __init__(self, processors=None) -> None:
+        self.processors = processors or []
+
+    def add_processor(self, processor: StreamProcessor) -> "StreamAggregator":
+        """Register a processor as a source."""
+        self.processors.append(processor)
+        return self
+
+    def aggregate(self, events):
+        """
+        Collect and merge events from all registered processors.
+
+        Parameters
+        ----------
+        events : iterable
+            Raw events passed to each processor in sequence.
+
+        Returns
+        -------
+        list
+            Concatenated processed results from all processors.
+        """
+        results = []
+        for proc in self.processors:
+            for event in events:
+                result = proc.process(event)
+                if result is not None:
+                    results.append(result)
+        return results

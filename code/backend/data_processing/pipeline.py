@@ -309,3 +309,17 @@ class PipelineBuilder:
     def build(self) -> DataPipeline:
         """Build and return the pipeline."""
         return self.pipeline
+
+
+# ---------------------------------------------------------------------------
+# Public aliases required by data_processing/__init__.py
+# ---------------------------------------------------------------------------
+
+#: Alias for DataExtractionStage (extract/load data from a source).
+DataLoader = DataExtractionStage
+
+#: Alias for DataTransformationStage (apply transformations to data).
+DataTransformer = DataTransformationStage
+
+#: Alias for DataLoadStage (write/export data to a destination).
+DataExporter = DataLoadStage

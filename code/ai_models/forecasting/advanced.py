@@ -105,6 +105,9 @@ class AdvancedTimeSeriesForecaster:
                 xp = self.proj(xb)
                 with tf.GradientTape() as tape:
                     pred = self.model(xp, training=True)
+                    # Model may return (batch, seq, out_dim); take last time-step
+                    if pred.shape.rank == 3:
+                        pred = pred[:, -1, :]
                     loss = loss_fn(yb, pred)
                 variables = (
                     self.model.trainable_variables + self.proj.trainable_variables
@@ -120,6 +123,8 @@ class AdvancedTimeSeriesForecaster:
                 for xb, yb in val_ds:
                     xp = self.proj(xb)
                     pred = self.model(xp, training=False)
+                    if pred.shape.rank == 3:
+                        pred = pred[:, -1, :]
                     val_loss_m.update_state(loss_fn(yb, pred))
                 history["val_loss"].append(float(val_loss_m.result()))
                 logger.info(
@@ -153,7 +158,33 @@ class AdvancedTimeSeriesForecaster:
         return self.model(xp, training=False).numpy()
 
     def save(self, filepath: str) -> None:
-        self.model.save_weights(filepath)
+        """
+        Persist model and projection layer weights as numpy arrays.
+
+        Saves to ``<filepath>_weights.npz`` — format-agnostic and independent
+        of Keras version or TF checkpoint conventions.
+        """
+        import numpy as np
+
+        weights = {f"model_{i}": w.numpy() for i, w in enumerate(self.model.weights)}
+        weights.update(
+            {f"proj_{i}": w.numpy() for i, w in enumerate(self.proj.weights)}
+        )
+        weights["_n_model"] = np.array(len(self.model.weights))
+        weights["_n_proj"] = np.array(len(self.proj.weights))
+        np.savez(filepath, **weights)
 
     def load(self, filepath: str) -> None:
-        self.model.load_weights(filepath)
+        """
+        Restore model and projection layer weights from ``<filepath>.npz``.
+
+        The file must have been created by :meth:`save`.
+        """
+        import numpy as np
+
+        path = filepath if filepath.endswith(".npz") else filepath + ".npz"
+        data = np.load(path, allow_pickle=False)
+        for i, w in enumerate(self.model.weights):
+            w.assign(data[f"model_{i}"])
+        for i, w in enumerate(self.proj.weights):
+            w.assign(data[f"proj_{i}"])

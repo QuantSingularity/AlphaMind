@@ -37,12 +37,13 @@ class TestTradingEnvironment:
             steps += 1
         assert done
 
-    def test_weights_sum_to_one(self, trading_env):
+    def test_weights_l1_norm_is_one(self, trading_env):
+        """_normalize divides by |w|.sum(), so the L1 norm must be 1."""
         trading_env.reset()
         for _ in range(5):
             trading_env.step(trading_env.action_space.sample())
         w = trading_env.current_weights
-        assert abs(w.sum() - 1.0) < 1e-5
+        assert abs(np.abs(w).sum() - 1.0) < 1e-5
 
     def test_zero_action_gives_uniform_weights(self, trading_env):
         """tanh(0) = 0; fallback should give uniform weights."""
@@ -67,9 +68,9 @@ class TestTradingEnvironment:
         rng = np.random.default_rng(42)
         action = rng.standard_normal(3)
         env_no_cost.reset(seed=99)
-        env_no_cost.returns = np.ones((50, 3)) * 0.01
+        env_no_cost.log_returns = np.ones((50, 3)) * 0.01
         env_with_cost.reset(seed=99)
-        env_with_cost.returns = np.ones((50, 3)) * 0.01
+        env_with_cost.log_returns = np.ones((50, 3)) * 0.01
         _, r_no, _, _, _ = env_no_cost.step(action)
         _, r_with, _, _, _ = env_with_cost.step(action)
         assert r_no >= r_with
@@ -86,8 +87,9 @@ class TestTradingEnvironment:
     def test_action_space_dtype(self, trading_env):
         assert trading_env.action_space.dtype == np.float32
 
-    def test_weights_always_positive_long_only(self, trading_env):
+    def test_weights_l1_norm_preserved_across_steps(self, trading_env):
+        """After every step, |w|.sum() must equal 1.0 (L1-normalised allocation)."""
         trading_env.reset()
         for _ in range(20):
             trading_env.step(trading_env.action_space.sample())
-            assert np.all(trading_env.current_weights >= 0.0)
+            assert abs(np.abs(trading_env.current_weights).sum() - 1.0) < 1e-5

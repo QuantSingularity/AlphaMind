@@ -327,3 +327,30 @@ def monitor_execution(monitor: PerformanceMonitor, metric_prefix: str = ""):
         return wrapper
 
     return decorator
+
+
+# ---------------------------------------------------------------------------
+# Public aliases required by data_processing/__init__.py
+# ---------------------------------------------------------------------------
+
+#: Alias — AlertManager wraps Alert-creation helpers.
+AlertManager = Alert
+
+#: Alias — MetricsCollector is the public name for MetricCollector.
+MetricsCollector = MetricCollector
+
+#: Alias — PerformanceTracker is the public name for PerformanceMonitor.
+PerformanceTracker = PerformanceMonitor
+
+
+class PipelineMonitor(PerformanceMonitor):
+    """
+    Pipeline-scoped performance monitor.
+
+    Thin subclass of :class:`PerformanceMonitor` that pre-tags all metrics
+    with a ``pipeline_name`` prefix, making dashboard queries easier.
+    """
+
+    def __init__(self, pipeline_name: str, **kwargs) -> None:
+        super().__init__(name=f"pipeline.{pipeline_name}", **kwargs)
+        self.pipeline_name = pipeline_name
