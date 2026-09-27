@@ -1,4 +1,4 @@
-"""Position repository — domain-specific queries on top of BaseRepository."""
+"""Position repository - domain-specific queries on top of BaseRepository."""
 
 from __future__ import annotations
 

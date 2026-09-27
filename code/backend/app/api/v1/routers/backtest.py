@@ -1,4 +1,4 @@
-"""Backtesting router — run and retrieve backtest results.
+"""Backtesting router - run and retrieve backtest results.
 
 POST /api/v1/backtest/ is the endpoint the web/mobile frontends actually
 call. It used to return entirely canned numbers from a hardcoded

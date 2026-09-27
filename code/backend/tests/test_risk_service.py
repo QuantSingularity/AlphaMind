@@ -1,4 +1,4 @@
-"""Tests for RiskService — VaR, stress scenarios, correlation, radar."""
+"""Tests for RiskService - VaR, stress scenarios, correlation, radar."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ class TestRiskService:
         await seed_positions(db_session)
         svc = RiskService(db_session)
         metrics = await svc.get_risk_metrics()
-        # AAPL(1.21), MSFT(0.92), TSLA(1.89) — weighted; should be > 0 and reasonable
+        # AAPL(1.21), MSFT(0.92), TSLA(1.89) - weighted; should be > 0 and reasonable
         assert 0.5 < metrics["beta"] < 2.5
 
     async def test_volatility_is_annualised(self, db_session):

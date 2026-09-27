@@ -1,5 +1,5 @@
 """
-ORM model registry — import every model module here so that Alembic's
+ORM model registry - import every model module here so that Alembic's
 ``autogenerate`` and ``create_all_tables`` pick them all up.
 """
 

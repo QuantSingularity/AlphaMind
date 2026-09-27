@@ -3,7 +3,7 @@ Service layer for AlphaMind API.
 
 Business logic sits between routers and the DB / execution layers.
 Each service accepts an ``AsyncSession`` in its constructor so that a
-single session — and therefore a single transaction — is shared across
+single session - and therefore a single transaction - is shared across
 all service calls within one request.
 
 FastAPI dependency factories are provided here so routers can stay thin:

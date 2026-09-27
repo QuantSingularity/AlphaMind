@@ -6,9 +6,9 @@ Requires the ML dependencies (`torch`, `gymnasium`) from `code/backend/requireme
 
 ## Components
 
-- `ai_models.environments.trading_env.TradingEnvironment` — a Gymnasium environment with a continuous action space `Box(-1, 1, (n_assets,))` (target weights) and a dictionary observation space.
-- `ai_models.agents.ddpg.DDPGTradingAgent` — a DDPG agent (`Actor` / `Critic` networks) with `select_action` and `train`.
-- `TradingEnvConfig` and `DDPGConfig` — configuration dataclasses.
+- `ai_models.environments.trading_env.TradingEnvironment` - a Gymnasium environment with a continuous action space `Box(-1, 1, (n_assets,))` (target weights) and a dictionary observation space.
+- `ai_models.agents.ddpg.DDPGTradingAgent` - a DDPG agent (`Actor` / `Critic` networks) with `select_action` and `train`.
+- `TradingEnvConfig` and `DDPGConfig` - configuration dataclasses.
 
 ## Minimal training loop
 

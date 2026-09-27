@@ -1,5 +1,5 @@
 """
-Root conftest.py — code/backend/conftest.py
+Root conftest.py - code/backend/conftest.py
 
 Responsibilities
 ----------------
@@ -8,7 +8,7 @@ Responsibilities
    ONCE per session via a pytest_configure hook (before pytest-asyncio starts
    its own event loop, so asyncio.run() is safe to call here).
 3. Override FastAPI's get_db dependency to point every TestClient request at
-   the pre-seeded test database — no "no such table" errors.
+   the pre-seeded test database - no "no such table" errors.
 4. Provide function-scoped in-memory DB fixtures for the service-layer unit
    tests (test_portfolio_service, test_trading_service, etc.).
 5. Expose seed helpers used by the unit tests.
@@ -17,7 +17,7 @@ Responsibilities
 from __future__ import annotations
 
 # ---------------------------------------------------------------------------
-# 1. sys.path fix — MUST be first
+# 1. sys.path fix - MUST be first
 # ---------------------------------------------------------------------------
 import sys
 from pathlib import Path
@@ -28,7 +28,7 @@ if _backend_root not in sys.path:
 
 # ---------------------------------------------------------------------------
 # Standard-library and third-party imports (db.session intentionally excluded
-# at module level — importing it creates the production engine immediately).
+# at module level - importing it creates the production engine immediately).
 # ---------------------------------------------------------------------------
 import asyncio
 import os
@@ -49,7 +49,7 @@ from sqlalchemy.pool import NullPool, StaticPool
 # NullPool is critical here: it ensures there is NO connection-pool affinity
 # to an event loop.  Tables are created in pytest_configure (asyncio.run,
 # fresh loop), then each TestClient request opens its own fresh connection in
-# pytest-asyncio's loop — both see the same on-disk file.
+# pytest-asyncio's loop - both see the same on-disk file.
 # ---------------------------------------------------------------------------
 _API_DB_PATH = os.path.join(os.path.dirname(__file__), "test_api.db")
 _API_DB_URL = f"sqlite+aiosqlite:///{_API_DB_PATH}"
@@ -79,7 +79,7 @@ async def _setup_api_db() -> None:
     from db.models.position import Position
     from db.models.strategy import Strategy
 
-    # Create tables (idempotent — checkfirst=True is the SQLAlchemy default)
+    # Create tables (idempotent - checkfirst=True is the SQLAlchemy default)
     async with _api_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -257,7 +257,7 @@ async def _teardown_api_db() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 4. pytest hooks — run BEFORE pytest-asyncio creates its own event loop,
+# 4. pytest hooks - run BEFORE pytest-asyncio creates its own event loop,
 #    so asyncio.run() is safe.
 # ---------------------------------------------------------------------------
 
@@ -266,8 +266,8 @@ def pytest_configure(config: pytest.Config) -> None:
     """
     Create API test DB tables and seed demo data.
 
-    Called very early in pytest startup — before test collection and before
-    pytest-asyncio initialises its event loop — so asyncio.run() has no
+    Called very early in pytest startup - before test collection and before
+    pytest-asyncio initialises its event loop - so asyncio.run() has no
     'already-running loop' conflict.
     """
     asyncio.run(_setup_api_db())
@@ -283,7 +283,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 5. Session-scoped autouse fixture — wire the get_db override into the app
+# 5. Session-scoped autouse fixture - wire the get_db override into the app
 #
 # The TestClient is created at module level in test_api.py / test_basic_api.py
 # BEFORE any fixture runs.  That is fine: FastAPI evaluates dependency_overrides
@@ -299,7 +299,7 @@ def _override_app_get_db() -> None:
     test_api.db.  Applies to every TestClient request for the whole test session.
     """
     # Lazy import keeps db.session (and its production engine) out of module
-    # level — we only need it now, when tests are actually about to run.
+    # level - we only need it now, when tests are actually about to run.
     from app.main import app
     from db.session import get_db
 
@@ -361,7 +361,7 @@ async def db_session(db_engine) -> AsyncGenerator[AsyncSession, None]:
 
 
 # ---------------------------------------------------------------------------
-# 7. Seed helpers — used by unit tests directly (not fixtures)
+# 7. Seed helpers - used by unit tests directly (not fixtures)
 # ---------------------------------------------------------------------------
 
 

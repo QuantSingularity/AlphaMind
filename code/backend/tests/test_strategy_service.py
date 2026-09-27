@@ -1,4 +1,4 @@
-"""Tests for StrategyService — CRUD, activate/deactivate, backtest lifecycle."""
+"""Tests for StrategyService - CRUD, activate/deactivate, backtest lifecycle."""
 
 from __future__ import annotations
 

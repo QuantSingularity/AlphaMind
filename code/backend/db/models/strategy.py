@@ -1,4 +1,4 @@
-"""Strategy ORM model — stores trading strategy definitions and live performance."""
+"""Strategy ORM model - stores trading strategy definitions and live performance."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ class Strategy(Base):
     # active | paused | archived
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="paused")
 
-    # Serialised JSON blob — strategy-specific hyper-parameters
+    # Serialised JSON blob - strategy-specific hyper-parameters
     parameters_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
 
     # Performance metrics (refreshed by strategy service)

@@ -38,7 +38,7 @@ Public methods include `prepare_tokenizer`, `preprocess_text`, `train`, `predict
 
 ## Related modules
 
-- `analytics/alternative_data/scrapers/sec_8k_monitor.py` — an SEC 8-K monitor that computes a sentiment label per filing.
-- `analytics/alternative_data/satellite_processing.py` — a satellite feature extractor.
+- `analytics/alternative_data/scrapers/sec_8k_monitor.py` - an SEC 8-K monitor that computes a sentiment label per filing.
+- `analytics/alternative_data/satellite_processing.py` - a satellite feature extractor.
 
 These are library modules for experimentation. The live `/api/v1/alternative-data/sources` response is a source registry and does not run these pipelines on each request.

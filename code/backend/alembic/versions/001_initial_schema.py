@@ -1,4 +1,4 @@
-"""Initial schema — create positions, orders, strategies, backtest_runs tables.
+"""Initial schema - create positions, orders, strategies, backtest_runs tables.
 
 Revision ID: 001
 Revises: (none)

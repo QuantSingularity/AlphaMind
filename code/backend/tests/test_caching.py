@@ -58,7 +58,7 @@ class TestSizeCachePolicy:
     def test_should_cache_none_returns_true(self):
         """SizeCachePolicy pickling None succeeds; it evaluates size, not None-ness."""
         policy = SizeCachePolicy()
-        # None pickles to ~5 bytes — well under the limit, so should_cache returns True
+        # None pickles to ~5 bytes - well under the limit, so should_cache returns True
         assert policy.should_cache("k", None) is True
 
     def test_is_valid_always_true(self):

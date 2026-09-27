@@ -1,4 +1,4 @@
-"""Order ORM model — represents a buy/sell order submission."""
+"""Order ORM model - represents a buy/sell order submission."""
 
 from __future__ import annotations
 

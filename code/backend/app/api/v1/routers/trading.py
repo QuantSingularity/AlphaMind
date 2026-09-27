@@ -1,4 +1,4 @@
-"""Trading operations router — order submission and management."""
+"""Trading operations router - order submission and management."""
 
 from typing import Any, Dict, List, Optional
 

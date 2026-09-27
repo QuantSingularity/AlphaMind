@@ -1,5 +1,5 @@
 """
-Risk service — computes portfolio risk metrics dynamically from live positions.
+Risk service - computes portfolio risk metrics dynamically from live positions.
 
 All metrics are derived from positions stored in the database.  No values
 are hard-coded.  The heavy probabilistic models (BayesianVaR, stress testing)
@@ -140,7 +140,7 @@ class RiskService:
             (ann_return - _RISK_FREE_RATE) / port_vol_annual if port_vol_annual else 0.0
         )
 
-        # Sortino — use downside vol approximation (σ / √2 for symmetric normal)
+        # Sortino - use downside vol approximation (σ / √2 for symmetric normal)
         downside_vol = port_vol_annual / math.sqrt(2)
         sortino = (ann_return - _RISK_FREE_RATE) / downside_vol if downside_vol else 0.0
 
@@ -281,7 +281,7 @@ class RiskService:
     def _portfolio_max_drawdown(positions: List[Any], nav: float) -> float:
         """
         Estimate max drawdown as the worst unrealised loss across positions
-        scaled by NAV.  This is a lower-bound — a proper simulation would
+        scaled by NAV.  This is a lower-bound - a proper simulation would
         use the full equity curve.
         """
         if nav <= 0:

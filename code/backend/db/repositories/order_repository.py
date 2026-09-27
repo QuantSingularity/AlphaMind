@@ -1,4 +1,4 @@
-"""Order repository — domain queries for trading orders."""
+"""Order repository - domain queries for trading orders."""
 
 from __future__ import annotations
 

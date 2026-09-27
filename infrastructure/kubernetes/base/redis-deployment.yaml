@@ -41,7 +41,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          # Password authentication — consistent with REDIS_AUTH_ENABLED: "true" in ConfigMap
+          # Password authentication - consistent with REDIS_AUTH_ENABLED: "true" in ConfigMap
           command:
             - redis-server
             - --appendonly

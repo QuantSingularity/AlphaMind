@@ -1,4 +1,4 @@
-"""BacktestRun repository — domain queries for backtest results."""
+"""BacktestRun repository - domain queries for backtest results."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Trading strategies router — full CRUD + activate/deactivate + backtests."""
+"""Trading strategies router - full CRUD + activate/deactivate + backtests."""
 
 from typing import Any, Dict, List, Optional
 

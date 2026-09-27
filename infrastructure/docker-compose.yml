@@ -120,7 +120,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      # Full SQLAlchemy async URL — this is what the backend actually reads.
+      # Full SQLAlchemy async URL - this is what the backend actually reads.
       DATABASE_URL: mysql+aiomysql://${MYSQL_USER:-alphamind_user}:${MYSQL_PASSWORD}@database:3306/${MYSQL_DATABASE:-alphamind_db}
       DATABASE_HOST: database
       DATABASE_PORT: 3306

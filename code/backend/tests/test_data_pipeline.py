@@ -186,4 +186,4 @@ class TestPipelineBuilder:
             pipeline = builder.build()
             assert isinstance(pipeline, DataPipeline)
         else:
-            pytest.skip("PipelineBuilder.build() not found — check API")
+            pytest.skip("PipelineBuilder.build() not found - check API")

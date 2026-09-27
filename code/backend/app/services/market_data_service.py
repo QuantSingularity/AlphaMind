@@ -1,14 +1,14 @@
 """
-Market data service — fetches quotes and OHLCV from configured connectors.
+Market data service - fetches quotes and OHLCV from configured connectors.
 
 A waterfall of connectors is tried in order of preference.  If all live
 connectors fail (missing API keys in dev), a deterministic synthetic feed
 is used so the rest of the stack stays functional.
 
 Connectors (in priority order):
-  1. Yahoo Finance  — no key required, used as primary in dev
-  2. Polygon.io     — requires POLYGON_API_KEY env var
-  3. Synthetic      — always available; deterministic GBM-like bars
+  1. Yahoo Finance  - no key required, used as primary in dev
+  2. Polygon.io     - requires POLYGON_API_KEY env var
+  3. Synthetic      - always available; deterministic GBM-like bars
 """
 
 from __future__ import annotations
@@ -138,7 +138,7 @@ class MarketDataService:
         return []
 
     # ------------------------------------------------------------------
-    # Yahoo Finance connector (yfinance — no API key needed)
+    # Yahoo Finance connector (yfinance - no API key needed)
     # ------------------------------------------------------------------
 
     @staticmethod
@@ -245,7 +245,7 @@ class MarketDataService:
         return None
 
     # ------------------------------------------------------------------
-    # Synthetic fallback — deterministic GBM-like bars
+    # Synthetic fallback - deterministic GBM-like bars
     # ------------------------------------------------------------------
 
     @staticmethod

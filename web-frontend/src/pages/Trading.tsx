@@ -271,7 +271,7 @@ export const Trading: React.FC = () => {
                             ? formatCurrency(o.filledPrice)
                             : o.price
                               ? formatCurrency(o.price)
-                              : "—"}
+                              : "-"}
                         </td>
                         <td className="px-4 py-3">
                           <Badge tone={statusTone(o.status)}>{o.status}</Badge>
@@ -287,7 +287,7 @@ export const Trading: React.FC = () => {
                               Cancel
                             </button>
                           ) : (
-                            <span className="text-ink-faint">—</span>
+                            <span className="text-ink-faint">-</span>
                           )}
                         </td>
                       </tr>

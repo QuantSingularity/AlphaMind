@@ -22,7 +22,7 @@ export const useStressScenarios = () => {
   return useQuery({
     queryKey: ["stress-scenarios"],
     queryFn: () => apiService.getStressScenarios(),
-    staleTime: 300_000, // 5 min — stress data rarely changes
+    staleTime: 300_000, // 5 min - stress data rarely changes
   });
 };
 

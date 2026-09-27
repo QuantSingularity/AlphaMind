@@ -80,12 +80,12 @@ AlphaMind/
 
 ### Research tier (library modules)
 
-`POST /api/v1/backtest/` genuinely trains and evaluates real models for `rl_agent` and `ml_alpha` strategies via `app/services/backtest_runner.py` — see [docs/BACKTEST_RESULTS.md](docs/BACKTEST_RESULTS.md). The rest of these modules are part of the codebase and can be imported and run, but aren't yet wired into any live API response.
+`POST /api/v1/backtest/` genuinely trains and evaluates real models for `rl_agent` and `ml_alpha` strategies via `app/services/backtest_runner.py` - see [docs/BACKTEST_RESULTS.md](docs/BACKTEST_RESULTS.md). The rest of these modules are part of the codebase and can be imported and run, but aren't yet wired into any live API response.
 
 | Component                  | Details                                                                                    | Connected to the live API? |
 | :------------------------- | :----------------------------------------------------------------------------------------- | :------------------------- |
-| **Forecasting**            | Transformer, attention, and multi-horizon model implementations (PyTorch / TensorFlow).    | Yes — `ml_alpha` backtests |
-| **Reinforcement learning** | DDPG and PPO agents with replay buffers and custom trading and portfolio Gym environments. | Yes — `rl_agent` backtests |
+| **Forecasting**            | Transformer, attention, and multi-horizon model implementations (PyTorch / TensorFlow).    | Yes - `ml_alpha` backtests |
+| **Reinforcement learning** | DDPG and PPO agents with replay buffers and custom trading and portfolio Gym environments. | Yes - `rl_agent` backtests |
 | **Generative models**      | GAN components for synthetic series and a regime model.                                    | Not yet                    |
 | **Risk**                   | Bayesian Value at Risk (PyMC), stress testing, counterparty and aggregation modules.       | Not yet                    |
 | **Execution**              | Liquidity forecasting, market-impact, order management, and routing modules.               | Not yet                    |

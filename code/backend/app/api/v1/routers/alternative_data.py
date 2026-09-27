@@ -1,4 +1,4 @@
-"""Alternative data router — satellite, sentiment, SEC filings, social media."""
+"""Alternative data router - satellite, sentiment, SEC filings, social media."""
 
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
@@ -47,7 +47,7 @@ _SOURCES: List[dict] = [
         "status": "active",
         "lastUpdate": _iso(_now() - timedelta(hours=6)),
         "dataPoints": 38_400,
-        "description": "Geospatial commodity intelligence — parking lots, oil tanks, crop yield",
+        "description": "Geospatial commodity intelligence - parking lots, oil tanks, crop yield",
         "latency": "6h",
     },
     {

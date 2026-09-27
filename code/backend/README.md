@@ -8,7 +8,7 @@ Institutional-grade quantitative AI trading system.
 
 ```
 backend/
-├── main.py                      # Entry point — delegates to app.main
+├── main.py                      # Entry point - delegates to app.main
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt

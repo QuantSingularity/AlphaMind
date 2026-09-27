@@ -920,13 +920,13 @@ class StreamingPipeline:
 # Public aliases required by data_processing/__init__.py
 # ---------------------------------------------------------------------------
 
-#: Alias — DataStreamProcessor is the public name for StreamProcessor.
+#: Alias - DataStreamProcessor is the public name for StreamProcessor.
 DataStreamProcessor = StreamProcessor
 
-#: Alias — KafkaStreamProcessor is the public name for KafkaStreamAdapter.
+#: Alias - KafkaStreamProcessor is the public name for KafkaStreamAdapter.
 KafkaStreamProcessor = KafkaStreamAdapter
 
-#: Alias — WebSocketStreamProcessor is the public name for WebSocketStreamAdapter.
+#: Alias - WebSocketStreamProcessor is the public name for WebSocketStreamAdapter.
 WebSocketStreamProcessor = WebSocketStreamAdapter
 
 

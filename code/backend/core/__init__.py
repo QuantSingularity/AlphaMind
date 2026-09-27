@@ -4,9 +4,9 @@ AlphaMind Core Package.
 Defines the fundamental domain primitives and abstract base class used
 throughout the AlphaMind system:
 
-- MarketData  — standard container for processed time series data
-- Signal      — standard container for trading signals
-- BaseModule  — abstract lifecycle base class for all functional modules
+- MarketData  - standard container for processed time series data
+- Signal      - standard container for trading signals
+- BaseModule  - abstract lifecycle base class for all functional modules
 
 Configuration management lives in core.config (ConfigManager).
 Exception hierarchy lives in core.exceptions.

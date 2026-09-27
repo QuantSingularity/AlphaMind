@@ -333,13 +333,13 @@ def monitor_execution(monitor: PerformanceMonitor, metric_prefix: str = ""):
 # Public aliases required by data_processing/__init__.py
 # ---------------------------------------------------------------------------
 
-#: Alias — AlertManager wraps Alert-creation helpers.
+#: Alias - AlertManager wraps Alert-creation helpers.
 AlertManager = Alert
 
-#: Alias — MetricsCollector is the public name for MetricCollector.
+#: Alias - MetricsCollector is the public name for MetricCollector.
 MetricsCollector = MetricCollector
 
-#: Alias — PerformanceTracker is the public name for PerformanceMonitor.
+#: Alias - PerformanceTracker is the public name for PerformanceMonitor.
 PerformanceTracker = PerformanceMonitor
 
 

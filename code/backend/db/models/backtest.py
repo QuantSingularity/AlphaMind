@@ -1,4 +1,4 @@
-"""BacktestRun ORM model — stores the results of a historical backtest."""
+"""BacktestRun ORM model - stores the results of a historical backtest."""
 
 from __future__ import annotations
 

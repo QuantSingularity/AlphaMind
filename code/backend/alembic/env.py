@@ -1,4 +1,4 @@
-"""Alembic environment — async SQLAlchemy migration runner."""
+"""Alembic environment - async SQLAlchemy migration runner."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 # Make sure the backend package is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import db.models  # noqa: E402, F401 — registers all ORM models with Base
+import db.models  # noqa: E402, F401 - registers all ORM models with Base
 from db.base import Base  # noqa: E402
 
 config = context.config

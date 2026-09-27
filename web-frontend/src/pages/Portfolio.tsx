@@ -330,7 +330,7 @@ export const Portfolio: React.FC = () => {
                         {pos.ticker}
                       </td>
                       <td className="px-4 py-3 text-ink-muted">
-                        {p.sector ?? "—"}
+                        {p.sector ?? "-"}
                       </td>
                       <td className="px-4 py-3 text-ink-muted">
                         {pos.quantity}
@@ -347,13 +347,13 @@ export const Portfolio: React.FC = () => {
                         {formatCurrency(pos.unrealizedPnL)}
                       </td>
                       <td className="px-4 py-3 text-ink-muted">
-                        {p.weight ? `${(p.weight * 100).toFixed(1)}%` : "—"}
+                        {p.weight ? `${(p.weight * 100).toFixed(1)}%` : "-"}
                       </td>
                       <td className="px-4 py-3 text-ink-muted">
-                        {p.beta?.toFixed(2) ?? "—"}
+                        {p.beta?.toFixed(2) ?? "-"}
                       </td>
                       <td className="px-4 py-3 text-ink-muted">
-                        {p.var95 ? formatCurrency(p.var95) : "—"}
+                        {p.var95 ? formatCurrency(p.var95) : "-"}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button

@@ -142,7 +142,7 @@ export const MarketData: React.FC = () => {
             <div className="am-card p-6">
               <div className="mb-4 flex items-baseline justify-between">
                 <h3 className="font-display text-base font-semibold text-ink">
-                  {effectiveSelected ?? "—"}
+                  {effectiveSelected ?? "-"}
                 </h3>
                 <span className="text-xs uppercase tracking-wide text-ink-faint">
                   90-day close

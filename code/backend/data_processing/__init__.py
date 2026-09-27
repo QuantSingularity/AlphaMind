@@ -3,11 +3,11 @@ AlphaMind Data Processing Framework.
 
 Optimised data processing capabilities for financial applications:
 
-1. pipeline   — Sequential ETL transformation stages
-2. parallel   — Multi-threading, multi-processing, and distributed execution
-3. streaming  — Real-time data ingestion and processing
-4. caching    — MemoryCache, DiskCache, RedisCache backends
-5. monitoring — Performance tracking and alert generation
+1. pipeline   - Sequential ETL transformation stages
+2. parallel   - Multi-threading, multi-processing, and distributed execution
+3. streaming  - Real-time data ingestion and processing
+4. caching    - MemoryCache, DiskCache, RedisCache backends
+5. monitoring - Performance tracking and alert generation
 """
 
 from data_processing.caching import (

@@ -70,12 +70,12 @@ export default function RiskScreen() {
   const metricCards = [
     {
       label: "Value at Risk (95%)",
-      value: metrics?.var != null ? `${Number(metrics.var).toFixed(2)}%` : "—",
+      value: metrics?.var != null ? `${Number(metrics.var).toFixed(2)}%` : "-",
       tone: "warning",
     },
     {
       label: "Portfolio Beta",
-      value: metrics?.beta != null ? Number(metrics.beta).toFixed(2) : "—",
+      value: metrics?.beta != null ? Number(metrics.beta).toFixed(2) : "-",
       tone: "neutral",
     },
     {
@@ -83,7 +83,7 @@ export default function RiskScreen() {
       value:
         metrics?.volatility != null
           ? `${(Number(metrics.volatility) * 100).toFixed(1)}%`
-          : "—",
+          : "-",
       tone: "neutral",
     },
     {
@@ -91,7 +91,7 @@ export default function RiskScreen() {
       value:
         metrics?.maxDrawdown != null
           ? `${(Number(metrics.maxDrawdown) * 100).toFixed(1)}%`
-          : "—",
+          : "-",
       tone: "negative",
     },
   ];

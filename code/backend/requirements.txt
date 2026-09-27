@@ -43,7 +43,7 @@ cryptography>=41.0.0  # required by PyMySQL for SSL support
 SQLAlchemy>=2.0.0,<3.0.0
 alembic>=1.12.0,<2.0.0
 
-# Deep Learning — required by ai_models (backend/app/services/backtest_runner.py
+# Deep Learning - required by ai_models (backend/app/services/backtest_runner.py
 # imports ai_models.agents / ai_models.environments / ai_models.forecasting)
 torch>=2.0.0,<3.0.0
 tensorflow>=2.15.0,<2.17.0
@@ -78,5 +78,5 @@ asyncpg>=0.29.0,<1.0.0            # PostgreSQL async driver (production option)
 aiomysql>=0.2.0,<1.0.0           # MySQL async driver (matches infra MySQL service)
 greenlet>=3.0.0                    # required by SQLAlchemy async on some platforms
 
-# Live market data (optional — gracefully degraded when absent)
+# Live market data (optional - gracefully degraded when absent)
 yfinance>=0.2.36,<1.0.0           # Yahoo Finance (no API key needed)

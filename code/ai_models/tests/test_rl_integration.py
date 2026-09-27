@@ -2,7 +2,7 @@
 End-to-end RL integration tests.
 
 These tests run a short training loop (few episodes, few steps) to confirm
-that the full DDPG pipeline — environment → agent → buffer → update —
+that the full DDPG pipeline - environment → agent → buffer → update -
 executes without error and produces finite metrics.
 
 They are deliberately kept fast (max_steps=30, episodes=3) so they can run

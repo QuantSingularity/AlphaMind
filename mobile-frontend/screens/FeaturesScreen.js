@@ -139,7 +139,7 @@ export default function FeaturesScreen() {
       textTransform: "uppercase",
       marginBottom: 14,
     },
-    // Feature card — matches web bg-white rounded-lg shadow-lg p-6
+    // Feature card - matches web bg-white rounded-lg shadow-lg p-6
     card: {
       backgroundColor: theme.colors.surface,
       borderRadius: 8,
@@ -213,7 +213,7 @@ export default function FeaturesScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header — matches web "Key Features" section heading */}
+      {/* Header - matches web "Key Features" section heading */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
           Key <Text style={styles.headerAccent}>Features</Text>

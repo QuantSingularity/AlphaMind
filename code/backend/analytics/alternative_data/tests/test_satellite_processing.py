@@ -1,4 +1,4 @@
-"""Tests for SatelliteFeatureExtractor — simulation mode (no API credentials needed)."""
+"""Tests for SatelliteFeatureExtractor - simulation mode (no API credentials needed)."""
 
 import os
 import sys

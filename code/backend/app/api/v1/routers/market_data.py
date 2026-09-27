@@ -1,14 +1,14 @@
 """
-Market data router — live quotes, OHLCV history, and ticker search.
+Market data router - live quotes, OHLCV history, and ticker search.
 
 Route inventory
 ---------------
-GET /quotes              — all reference tickers (bulk)
-GET /quotes/{ticker}     — single ticker quote   (canonical)
-GET /quote/{ticker}      — alias kept for test_api.py / test_basic_api.py
-GET /history/{ticker}    — OHLCV bars            (canonical)
-GET /historical/{ticker} — alias kept for test_api.py / test_basic_api.py
-GET /batch-quotes        — comma-separated tickers
+GET /quotes              - all reference tickers (bulk)
+GET /quotes/{ticker}     - single ticker quote   (canonical)
+GET /quote/{ticker}      - alias kept for test_api.py / test_basic_api.py
+GET /history/{ticker}    - OHLCV bars            (canonical)
+GET /historical/{ticker} - alias kept for test_api.py / test_basic_api.py
+GET /batch-quotes        - comma-separated tickers
 """
 
 from typing import Any, Dict, List, Optional
@@ -49,7 +49,7 @@ class OHLCV(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Routes — fixed paths registered BEFORE wildcard paths
+# Routes - fixed paths registered BEFORE wildcard paths
 # ---------------------------------------------------------------------------
 
 
@@ -72,7 +72,7 @@ async def get_batch_quotes(
 
 
 # ---------------------------------------------------------------------------
-# Single-ticker quote — two paths: canonical (/quotes/X) + alias (/quote/X)
+# Single-ticker quote - two paths: canonical (/quotes/X) + alias (/quote/X)
 # ---------------------------------------------------------------------------
 
 
@@ -102,7 +102,7 @@ async def get_quote_singular(
 
 
 # ---------------------------------------------------------------------------
-# OHLCV history — two paths: canonical (/history/X) + alias (/historical/X)
+# OHLCV history - two paths: canonical (/history/X) + alias (/historical/X)
 # ---------------------------------------------------------------------------
 
 

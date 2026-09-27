@@ -7,7 +7,7 @@ import authReducer from "../../store/slices/authSlice";
 import portfolioReducer from "../../store/slices/portfolioSlice";
 import settingsReducer from "../../store/slices/settingsSlice";
 
-// Standalone mock — avoids jest.requireActual issues with toolkit/immer
+// Standalone mock - avoids jest.requireActual issues with toolkit/immer
 jest.mock("../../store/slices/portfolioSlice", () => {
   const initialState = {
     data: null,

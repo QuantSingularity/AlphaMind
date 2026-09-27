@@ -1,4 +1,4 @@
-"""Add backtest_runs.error_message — records why a backtest failed.
+"""Add backtest_runs.error_message - records why a backtest failed.
 
 Added alongside app.services.backtest_runner, which actually executes
 backtests now (previously they stayed "pending" forever, so there was

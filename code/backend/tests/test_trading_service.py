@@ -1,4 +1,4 @@
-"""Tests for TradingService — order lifecycle: create, fetch, cancel."""
+"""Tests for TradingService - order lifecycle: create, fetch, cancel."""
 
 from __future__ import annotations
 

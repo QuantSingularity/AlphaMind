@@ -35,7 +35,7 @@ describe("config constants", () => {
 
   it("PORTFOLIO.DETAILS returns correct URL with id", () => {
     const { API_ENDPOINTS } = require("../../constants/config");
-    // Legacy path — no /v1/ prefix, kept for backward compat
+    // Legacy path - no /v1/ prefix, kept for backward compat
     expect(API_ENDPOINTS.PORTFOLIO.DETAILS("abc123")).toBe(
       "/api/portfolio/abc123",
     );

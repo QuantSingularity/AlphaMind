@@ -72,7 +72,7 @@ export default function PortfolioScreen() {
 
   const normalizedHoldings = (holdings ?? []).map((h, i) => ({
     key: h.id ?? h.ticker ?? h.symbol ?? String(i),
-    ticker: h.ticker ?? h.symbol ?? "—",
+    ticker: h.ticker ?? h.symbol ?? "-",
     name: h.name ?? h.sector ?? "",
     value: h.value ?? h.marketValue ?? 0,
     weight: h.weight ?? h.percentage ?? null,
@@ -153,11 +153,11 @@ export default function PortfolioScreen() {
                   </Text>
                   <Text style={[styles.td, styles.cWeight]}>
                     {h.weight == null
-                      ? "—"
+                      ? "-"
                       : `${(h.weight <= 1 ? h.weight * 100 : h.weight).toFixed(1)}%`}
                   </Text>
                   <Text style={[styles.td, styles.cPnl, { color: pnlColor }]}>
-                    {h.pnl == null ? "—" : formatCurrency(h.pnl)}
+                    {h.pnl == null ? "-" : formatCurrency(h.pnl)}
                   </Text>
                 </View>
               );

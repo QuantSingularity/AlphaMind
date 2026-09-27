@@ -1,5 +1,5 @@
 """
-Basic API functionality tests — updated to match v2 API contracts.
+Basic API functionality tests - updated to match v2 API contracts.
 """
 
 from app.main import app
@@ -37,7 +37,7 @@ def test_openapi_schema():
 
 
 def test_trading_orders_endpoint():
-    """v2: MARKET orders are filled immediately — status is 'filled', not 'pending'."""
+    """v2: MARKET orders are filled immediately - status is 'filled', not 'pending'."""
     order_data = {
         "ticker": "AAPL",
         "side": "BUY",
@@ -125,7 +125,7 @@ def test_strategies_endpoint():
 
 
 def test_backtest_endpoint():
-    """v2: backtest is at /api/v1/backtest/ — dedicated router, no DB needed."""
+    """v2: backtest is at /api/v1/backtest/ - dedicated router, no DB needed."""
     backtest_data = {
         "strategyId": "strat-001",
         "startDate": "2023-01-01",

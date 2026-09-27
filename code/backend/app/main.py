@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Demo-data seed (idempotent — skipped if positions already exist)
+# Demo-data seed (idempotent - skipped if positions already exist)
 # ---------------------------------------------------------------------------
 
 
@@ -50,7 +50,7 @@ async def _seed_demo_data() -> None:
             await session.execute(select(func.count()).select_from(Position))
         ).scalar_one()
         if count > 0:
-            logger.info("Database already seeded — skipping demo data.")
+            logger.info("Database already seeded - skipping demo data.")
             return
 
         logger.info("Seeding demo positions and strategies …")
@@ -271,7 +271,7 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# Routers — versioned (canonical)
+# Routers - versioned (canonical)
 # ---------------------------------------------------------------------------
 app.include_router(health.router, tags=["health"])
 app.include_router(auth_router)

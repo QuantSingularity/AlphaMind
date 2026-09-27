@@ -161,7 +161,7 @@ class AdvancedTimeSeriesForecaster:
         """
         Persist model and projection layer weights as numpy arrays.
 
-        Saves to ``<filepath>_weights.npz`` — format-agnostic and independent
+        Saves to ``<filepath>_weights.npz`` - format-agnostic and independent
         of Keras version or TF checkpoint conventions.
         """
         import numpy as np

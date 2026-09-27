@@ -79,7 +79,7 @@ export default function KPICard({
           </View>
         )}
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.value}>{isLoading ? "—" : value}</Text>
+        <Text style={styles.value}>{isLoading ? "-" : value}</Text>
         {!!change && (
           <Text
             style={[

@@ -32,7 +32,7 @@ export const API_TIMEOUT =
   Number(process.env.EXPO_PUBLIC_API_TIMEOUT || process.env.API_TIMEOUT) ||
   30000;
 
-// Mock data is DISABLED by default — real API is always used.
+// Mock data is DISABLED by default - real API is always used.
 // Set EXPO_PUBLIC_ENABLE_MOCK_DATA=true only for UI development without a backend.
 export const ENABLE_MOCK_DATA =
   process.env.EXPO_PUBLIC_ENABLE_MOCK_DATA === "true" ||
@@ -83,7 +83,7 @@ export const API_ENDPOINTS = {
   MARKET: {
     // Legacy key kept so existing tests pass
     QUOTES: "/api/v1/market-data/quotes",
-    CHART: "/api/v1/market-data/historical", // restored — tests check for CHART
+    CHART: "/api/v1/market-data/historical", // restored - tests check for CHART
     QUOTE: (symbol) => `/api/v1/market-data/quote/${symbol}`,
     HISTORICAL: (symbol) => `/api/v1/market-data/historical/${symbol}`,
   },
@@ -93,7 +93,7 @@ export const API_ENDPOINTS = {
     CANCEL: (id) => `/api/v1/trading/orders/${id}`,
   },
 
-  // Research papers — legacy endpoint path, kept for test compatibility
+  // Research papers - legacy endpoint path, kept for test compatibility
   RESEARCH: {
     PAPERS: "/api/research/papers",
     DETAILS: (id) => `/api/research/papers/${id}`,

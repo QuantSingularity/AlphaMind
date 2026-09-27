@@ -485,7 +485,7 @@ const StrategyCard: React.FC<{
         </div>
         <p className="text-xs text-ink-muted mb-4">{strategy.description}</p>
 
-        {/* Mini equity curve — live from API */}
+        {/* Mini equity curve - live from API */}
         <div className="h-24 mb-4">
           {equityCurve.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">

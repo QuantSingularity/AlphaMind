@@ -70,7 +70,7 @@ export default function SettingsScreen() {
       backgroundColor: theme.colors.background,
       flexGrow: 1,
     },
-    // Header — matches web page header style
+    // Header - matches web page header style
     header: {
       backgroundColor: theme.colors.surface,
       borderBottomColor: theme.colors.outlineVariant,
@@ -91,7 +91,7 @@ export default function SettingsScreen() {
       color: theme.colors.onSurfaceVariant,
       fontSize: 14,
     },
-    // User card — matches web card with profile info
+    // User card - matches web card with profile info
     userCard: {
       alignItems: "center",
       backgroundColor: theme.colors.surface,
@@ -132,7 +132,7 @@ export default function SettingsScreen() {
       fontSize: 13,
       marginTop: 1,
     },
-    // Section cards — matches web shadow rounded-lg
+    // Section cards - matches web shadow rounded-lg
     sectionCard: {
       backgroundColor: theme.colors.surface,
       borderColor: theme.colors.outlineVariant,

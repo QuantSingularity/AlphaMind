@@ -1,5 +1,5 @@
 """
-Portfolio service — business logic for portfolio aggregation, equity curves,
+Portfolio service - business logic for portfolio aggregation, equity curves,
 and performance metrics.
 
 All data is read from and written to the database via the PositionRepository.
@@ -64,7 +64,7 @@ class PortfolioService:
         }
 
     # ------------------------------------------------------------------
-    # Holdings (simplified — used by mobile)
+    # Holdings (simplified - used by mobile)
     # ------------------------------------------------------------------
 
     async def get_holdings(

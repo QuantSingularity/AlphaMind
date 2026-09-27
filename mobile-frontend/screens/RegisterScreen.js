@@ -58,7 +58,7 @@ export default function RegisterScreen({ navigation }) {
       setLocalError("Password is required");
       return;
     }
-    // Password length and mismatch are shown by HelperText — no localError needed
+    // Password length and mismatch are shown by HelperText - no localError needed
     if (password.length < MIN_PASSWORD_LENGTH) {
       return;
     }

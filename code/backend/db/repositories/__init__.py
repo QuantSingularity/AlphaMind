@@ -1,4 +1,4 @@
-"""Repository package — exports all concrete repositories."""
+"""Repository package - exports all concrete repositories."""
 
 from db.repositories.backtest_repository import BacktestRepository
 from db.repositories.order_repository import OrderRepository

@@ -33,7 +33,7 @@ describe("KPICard", () => {
 
   it("shows loading dash when isLoading is true", () => {
     renderWithPaper(<KPICard {...defaultProps} isLoading={true} />);
-    expect(screen.getByText("—")).toBeTruthy();
+    expect(screen.getByText("-")).toBeTruthy();
     expect(screen.queryByText("$1,250,345.67")).toBeNull();
   });
 

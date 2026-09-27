@@ -1,4 +1,4 @@
-"""Strategy repository — domain queries for trading strategies."""
+"""Strategy repository - domain queries for trading strategies."""
 
 from __future__ import annotations
 

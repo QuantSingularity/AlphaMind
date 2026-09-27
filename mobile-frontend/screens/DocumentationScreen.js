@@ -114,7 +114,7 @@ const sections = [
   },
 ];
 
-// Getting Started code block — matches web "Getting Started" section
+// Getting Started code block - matches web "Getting Started" section
 const gettingStartedCode = `# Clone repository
 git clone https://github.com/quantsingularity/AlphaMind.git
 cd AlphaMind
@@ -145,7 +145,7 @@ export default function DocumentationScreen() {
       flexGrow: 1,
       backgroundColor: theme.colors.background,
     },
-    // Header — matches web section header
+    // Header - matches web section header
     header: {
       backgroundColor: theme.colors.surface,
       paddingHorizontal: 16,
@@ -167,7 +167,7 @@ export default function DocumentationScreen() {
       color: theme.colors.onSurfaceVariant,
       lineHeight: 20,
     },
-    // Code block — matches web dark code section
+    // Code block - matches web dark code section
     codeSection: {
       margin: 16,
       borderRadius: 8,
@@ -221,7 +221,7 @@ export default function DocumentationScreen() {
       borderBottomWidth: 2,
       borderBottomColor: theme.colors.primary,
     },
-    // Doc item — matches web list items
+    // Doc item - matches web list items
     docItem: {
       backgroundColor: theme.colors.surface,
       borderRadius: 8,
@@ -281,7 +281,7 @@ export default function DocumentationScreen() {
         </Text>
       </View>
 
-      {/* Code block — matches web Getting Started section */}
+      {/* Code block - matches web Getting Started section */}
       <View style={styles.codeSection}>
         <View style={styles.codeHeader}>
           <Text style={styles.codeHeaderText}>QUICK START</Text>

@@ -42,7 +42,7 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """FastAPI dependency — yields a single DB session per request."""
+    """FastAPI dependency - yields a single DB session per request."""
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -56,8 +56,8 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def create_all_tables() -> None:
     """Create all tables (used in lifespan / tests; production uses Alembic)."""
-    import db.models  # noqa: F401 — side-effect: registers all model classes
-    from db.base import Base  # noqa: F401 — ensures models are registered
+    import db.models  # noqa: F401 - side-effect: registers all model classes
+    from db.base import Base  # noqa: F401 - ensures models are registered
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

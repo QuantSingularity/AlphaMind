@@ -156,7 +156,7 @@ class CacheManager:
         """
         cache_key = self._make_key(key)
         if self.policy.should_cache(cache_key, value):
-            # Store perf_counter() — monotonic clock, immune to NTP adjustments.
+            # Store perf_counter() - monotonic clock, immune to NTP adjustments.
             self._cache[cache_key] = (value, time.perf_counter())
             logger.debug(f"Cached value for key: {cache_key}")
             return True
@@ -333,7 +333,7 @@ class DiskCache:
         self._cache_dir = cache_dir
         os.makedirs(cache_dir, exist_ok=True)
         # DiskCache stores os.path.getmtime() (Unix timestamps) and passes them
-        # to policy.is_valid(), which uses time.time() — the clocks match.
+        # to policy.is_valid(), which uses time.time() - the clocks match.
         self._policy = policy or TTLCachePolicy(ttl_seconds=86400)
         self._timestamps: Dict[str, float] = {}
 

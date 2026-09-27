@@ -1,5 +1,5 @@
 """
-Strategy service — CRUD for trading strategies and backtest lifecycle.
+Strategy service - CRUD for trading strategies and backtest lifecycle.
 
 Strategy parameters are stored as a JSON blob in the DB. Backtests are
 executed by app.services.backtest_runner (real simulations backed by

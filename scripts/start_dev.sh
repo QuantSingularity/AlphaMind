@@ -179,5 +179,5 @@ print_info "Backend server started with PID: $BACKEND_PID"
 # Start web frontend in the foreground (blocking)
 start_web_frontend
 
-# Frontend exited (normal stop) — clean up backend
+# Frontend exited (normal stop) - clean up backend
 cleanup

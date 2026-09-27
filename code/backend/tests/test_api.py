@@ -1,5 +1,5 @@
 """
-Tests for AlphaMind API endpoints — updated to match v2 API contracts.
+Tests for AlphaMind API endpoints - updated to match v2 API contracts.
 """
 
 import os
@@ -32,7 +32,7 @@ class TestHealthEndpoints:
 
 class TestTradingEndpoints:
     def test_create_order(self):
-        """Order creation — MARKET orders are immediately filled (status == 'filled')."""
+        """Order creation - MARKET orders are immediately filled (status == 'filled')."""
         order_data = {
             "ticker": "AAPL",
             "side": "BUY",

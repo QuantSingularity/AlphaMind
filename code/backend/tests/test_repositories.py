@@ -1,4 +1,4 @@
-"""Tests for the repository layer — covers CRUD and domain-specific queries."""
+"""Tests for the repository layer - covers CRUD and domain-specific queries."""
 
 from __future__ import annotations
 

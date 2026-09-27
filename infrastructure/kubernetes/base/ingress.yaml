@@ -31,7 +31,7 @@ spec:
     - host: alphamind.example.com
       http:
         paths:
-          # Backend API — passes full /api/... path to FastAPI
+          # Backend API - passes full /api/... path to FastAPI
           - path: /api(/|$)(.*)
             pathType: ImplementationSpecific
             backend:

@@ -1,4 +1,4 @@
-"""Database package — re-exports session utilities and models."""
+"""Database package - re-exports session utilities and models."""
 
 from db.session import AsyncSessionLocal, create_all_tables, engine, get_db
 

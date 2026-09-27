@@ -329,7 +329,7 @@ export default function HomeScreen() {
           </Text>
         </View>
       )}
-      {/* Hero Section — matches web hero */}
+      {/* Hero Section - matches web hero */}
       <View style={styles.heroSection}>
         <View style={styles.heroToggle}>
           <ThemeToggle color={theme.colors.onBackground} />
@@ -348,7 +348,7 @@ export default function HomeScreen() {
         </Text>
       </View>
 
-      {/* Portfolio Overview Cards — matches web grid-cols-4 → 2×2 on mobile */}
+      {/* Portfolio Overview Cards - matches web grid-cols-4 → 2×2 on mobile */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Portfolio Overview</Text>
@@ -360,7 +360,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Performance Metrics Table — matches web table section */}
+      {/* Performance Metrics Table - matches web table section */}
       <View style={styles.sectionAlt}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Performance</Text>

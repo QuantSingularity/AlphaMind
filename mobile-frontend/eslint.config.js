@@ -75,7 +75,7 @@ export default [
       "react-native/no-inline-styles": "warn",
       "react-native/no-color-literals": "warn",
       "react-native/no-raw-text": "warn", // Can be strict, adjust as needed
-      // Purely cosmetic style ordering — keep as guidance, not a build failure
+      // Purely cosmetic style ordering - keep as guidance, not a build failure
       // (consistent with the other cosmetic rules above being warnings).
       "react-native/sort-styles": "warn",
     },

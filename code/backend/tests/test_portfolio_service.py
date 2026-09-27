@@ -1,4 +1,4 @@
-"""Tests for PortfolioService — summary, holdings, positions, performance."""
+"""Tests for PortfolioService - summary, holdings, positions, performance."""
 
 from __future__ import annotations
 
@@ -106,10 +106,10 @@ class TestPortfolioService:
     async def test_close_already_closed_position_returns_none(self, db_session):
         await seed_positions(db_session)
         svc = PortfolioService(db_session)
-        # Close once — should succeed
+        # Close once - should succeed
         r1 = await svc.close_position("pos-001")
         assert r1 is not None
-        # Close again — should return None (not open)
+        # Close again - should return None (not open)
         r2 = await svc.close_position("pos-001")
         assert r2 is None
 

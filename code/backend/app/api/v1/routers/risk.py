@@ -1,4 +1,4 @@
-"""Risk management router — VaR, stress tests, correlation, and radar."""
+"""Risk management router - VaR, stress tests, correlation, and radar."""
 
 from typing import Any, Dict, List, Optional
 

@@ -1,5 +1,5 @@
 """
-tests/conftest.py — thin shim that re-exports shared fixtures and helpers.
+tests/conftest.py - thin shim that re-exports shared fixtures and helpers.
 
 All fixture and hook logic now lives in the root-level conftest.py so that
 it applies to *every* test regardless of which sub-directory it lives in.

@@ -108,7 +108,7 @@ export default function ResearchScreen() {
       textTransform: "uppercase",
       marginBottom: 14,
     },
-    // Paper card — matches web bg-white shadow rounded-lg
+    // Paper card - matches web bg-white shadow rounded-lg
     card: {
       backgroundColor: theme.colors.surface,
       borderRadius: 8,
@@ -170,7 +170,7 @@ export default function ResearchScreen() {
       fontSize: 12,
       color: theme.colors.outline,
     },
-    // Card footer — matches web table row bottom border style
+    // Card footer - matches web table row bottom border style
     cardFooter: {
       borderTopWidth: 1,
       borderTopColor: theme.colors.outlineVariant,

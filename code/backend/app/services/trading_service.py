@@ -1,10 +1,10 @@
 """
-Trading service — order submission, cancellation, and lifecycle management.
+Trading service - order submission, cancellation, and lifecycle management.
 
 Orders are persisted to the database via OrderRepository.  When a MARKET
 order is submitted it is immediately "filled" (simulated fill) so the UI
 reflects a realistic order flow.  A fill price is only recorded when a
-reference price is available — if none is provided, filled_price is left
+reference price is available - if none is provided, filled_price is left
 as None to avoid returning a meaningless $100 sentinel.
 
 LIMIT and STOP orders remain pending until an explicit fill trigger.

@@ -1,7 +1,7 @@
 """
 Unit tests for PortfolioOptimizer (analytics/alpha_research/portfolio_optimization.py).
 
-Focuses on model construction, preprocessing, and weight output properties —
+Focuses on model construction, preprocessing, and weight output properties -
 avoiding full training loops to keep the test suite fast.
 """
 

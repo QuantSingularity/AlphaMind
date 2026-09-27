@@ -512,7 +512,7 @@ deploy_backend() {
     run_remote "cd $RELEASE_DIR && python3 -m venv venv"
     run_remote "cd $RELEASE_DIR && source venv/bin/activate && pip install -r backend/requirements.txt"
 
-    # Run database migrations if needed (Alembic — backend is FastAPI)
+    # Run database migrations if needed (Alembic - backend is FastAPI)
     if [[ "$DEPLOY_ENV" != "development" ]]; then
       print_info "Running database migrations..."
       run_remote "cd $RELEASE_DIR && source venv/bin/activate && cd backend && alembic upgrade head"

@@ -1,4 +1,4 @@
-"""Position ORM model — represents an open or closed trading position."""
+"""Position ORM model - represents an open or closed trading position."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ class Position(Base):
     realized_pnl: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     weight: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
-    # Risk metrics — refreshed by the risk service
+    # Risk metrics - refreshed by the risk service
     beta: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     sharpe_contrib: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     var_95: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
