@@ -3,7 +3,8 @@
 from typing import Any, Dict, List, Optional
 
 from app.services import StrategyService, get_strategy_service
-from fastapi import APIRouter, Depends, HTTPException
+from app.services.strategy_service import run_backtest_in_background
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 router = APIRouter()
@@ -64,23 +65,36 @@ async def create_strategy(
 @router.post("/backtest", status_code=202)
 async def run_backtest(
     payload: BacktestRequest,
+    background_tasks: BackgroundTasks,
     svc: StrategyService = Depends(get_strategy_service),
 ) -> Dict[str, Any]:
     """
     Submit a backtest job.
 
-    The run is created with status 'pending' and picked up by a background
-    worker.  Returns the backtest record immediately (HTTP 202 Accepted).
+    The run is created with status 'pending' and actually executed by
+    run_backtest_in_background as a FastAPI background task, moving it
+    through 'running' to 'completed'/'failed'. Returns the backtest
+    record immediately (HTTP 202 Accepted); poll GET /backtests/{id} for
+    the result.
     """
     strategy = await svc.get_strategy(payload.strategyId)
     if strategy is None:
         raise HTTPException(status_code=404, detail="Strategy not found")
-    return await svc.create_backtest(
+    backtest = await svc.create_backtest(
         strategy_id=payload.strategyId,
         start_date=payload.startDate,
         end_date=payload.endDate,
         initial_capital=payload.initialCapital,
     )
+    background_tasks.add_task(
+        run_backtest_in_background,
+        backtest_id=backtest["id"],
+        strategy_id=payload.strategyId,
+        start_date=payload.startDate,
+        end_date=payload.endDate,
+        initial_capital=payload.initialCapital,
+    )
+    return backtest
 
 
 @router.get("/backtests/{backtest_id}")

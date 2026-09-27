@@ -4,8 +4,11 @@ services:
   # ── AlphaMind API ──────────────────────────────────────────────────────────
   api:
     build:
-      context: .
-      dockerfile: Dockerfile
+      # code/ (one level up from this file) is the build context so the
+      # Dockerfile can also COPY in the ai_models/ sibling package - see
+      # backend/Dockerfile's comment.
+      context: ..
+      dockerfile: backend/Dockerfile
       target: runtime
     image: alphamind-api:latest
     container_name: alphamind_api

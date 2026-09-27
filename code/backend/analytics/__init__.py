@@ -7,5 +7,7 @@ Provides research, data science, and model validation capabilities:
 - alternative_data: Satellite, sentiment, and web scraping tools
 - model_validation: Cross-validation, explainability, and reporting
 - visualization: Dashboards and charting utilities
-- reinforcement_learning: RL-based trading strategies
+
+RL-based trading strategies live in ai_models.agents / ai_models.environments
+(see app.services.backtest_runner for how the backend drives them), not here.
 """

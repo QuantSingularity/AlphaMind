@@ -24,9 +24,10 @@ AlphaMind is a tiered system: two client applications, one backend service, and 
         │  PostgreSQL; Redis (optional)  │
         └────────────────────────────────┘
 
-   Research library (imported as needed, not all wired to the API):
-   code/ai_models: forecasting, RL agents, generative models
-   code/backend: analytics, risk, execution, market_data modules
+   code/ai_models: forecasting, RL agents (used by backtest_runner - see below),
+                   generative models (not yet wired to the API)
+   code/backend: analytics, Bayesian risk, execution, market_data modules
+                   (library code, not yet wired to the API)
 ```
 
 ## Backend
@@ -36,7 +37,7 @@ The FastAPI application lives in `code/backend/app`. Routers under `app/api/v1/r
 Request flow:
 
 ```
-client → router (/api/v1/...) → service class → (seeded data | live connector | DB) → JSON
+client → router (/api/v1/...) → service class → (seeded data | live connector | DB | ai_models) → JSON
 ```
 
 The data routers are open (no auth gate); auth applies to the `/api/auth` endpoints. The market-data service tries live connectors (Yahoo Finance, then optional Polygon) and falls back to a deterministic synthetic generator, tagging each quote with its `source`.
@@ -61,7 +62,7 @@ Because the clients and the API drifted in the past, the backend ships a contrac
 
 ## Research library
 
-`code/ai_models` contains forecasting models (transformer, attention, multi-horizon), reinforcement-learning agents (DDPG, PPO) with trading and portfolio environments, and generative models (GAN, regime). `code/backend` additionally holds analytics, Bayesian risk (`bayesian_var`), stress testing, and execution modules (liquidity forecasting, market impact, routing, order management). These are importable building blocks; the live API responses are seeded by default rather than produced by these models.
+`code/ai_models` contains forecasting models (transformer, attention, multi-horizon), reinforcement-learning agents (DDPG, PPO) with trading and portfolio environments, and generative models (GAN, regime). `POST /api/v1/backtest/` genuinely trains and evaluates these forecasting and RL models for `ml_alpha`/`rl_agent` strategies via `app/services/backtest_runner.py` (see [BACKTEST_RESULTS.md](BACKTEST_RESULTS.md)); the generative models are not yet wired to any endpoint. `code/backend` additionally holds analytics, Bayesian risk (`bayesian_var`), stress testing, and execution modules (liquidity forecasting, market impact, routing, order management) - these remain importable building blocks that live API responses don't yet call into.
 
 ## Infrastructure
 

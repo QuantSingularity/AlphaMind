@@ -127,12 +127,40 @@ POST /api/v1/backtest/
   "initialCapital": number
 }
 → {
-    "totalReturn", "annualisedReturn", "sharpeRatio", "sortinoRatio",
-    "maxDrawdown", "winRate", "profitFactor", "finalCapital"
+    "id", "strategyId", "startDate", "endDate", "initialCapital", "finalCapital",
+    "totalReturn", "annualisedReturn", "sharpeRatio", "sortinoRatio", "calmarRatio",
+    "maxDrawdown", "maxDrawdownDuration", "winRate", "profitFactor", "totalTrades",
+    "avgWin", "avgLoss", "bestMonth", "worstMonth",
+    "equityCurve": [ { "date", "equity", "benchmark", "drawdown" } ]
   }
 ```
 
-The result fields are flat (not nested under a `metrics` object).
+The result fields are flat (not nested under a `metrics` object). This genuinely
+executes the strategy via `app/services/backtest_runner.py`: `rl_agent` and
+`ml_alpha` strategies train and evaluate a real `ai_models` agent/forecaster,
+while `momentum` and `mean_reversion` run rule-based logic - all against a
+synthetic (seeded, reproducible) price series. Because training happens
+synchronously in the request, an `rl_agent`/`ml_alpha` backtest can take a
+few seconds; see `POST /api/v1/strategies/backtest` below for a fire-and-forget
+alternative.
+
+Returns 404 if `strategyId` doesn't exist, 422 if the strategy's `type` isn't
+one of `momentum` / `mean_reversion` / `ml_alpha` / `rl_agent`.
+
+### Alternative: async backtest via the strategies router
+
+```
+POST /api/v1/strategies/backtest
+{ "strategyId": string, "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "initialCapital": number }
+→ 202 { "id", "strategyId", "status": "pending", ... }
+```
+
+Returns immediately with `status: "pending"` and runs the same simulation as
+a background task, moving through `"running"` to `"completed"`/`"failed"`.
+Poll `GET /api/v1/strategies/backtests/{id}` for the result, which has a
+smaller field set: `finalCapital`, `totalReturn`, `sharpeRatio`, `maxDrawdown`,
+`totalTrades`, `winRate`, `status`, `errorMessage` (set if `status` is
+`"failed"`).
 
 ## Market Data - `/api/v1/market-data`
 

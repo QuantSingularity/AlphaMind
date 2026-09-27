@@ -80,15 +80,15 @@ AlphaMind/
 
 ### Research tier (library modules)
 
-| Component                  | Details                                                                                    |
-| :------------------------- | :----------------------------------------------------------------------------------------- |
-| **Forecasting**            | Transformer, attention, and multi-horizon model implementations (PyTorch / TensorFlow).    |
-| **Reinforcement learning** | DDPG and PPO agents with replay buffers and custom trading and portfolio Gym environments. |
-| **Generative models**      | GAN components for synthetic series and a regime model.                                    |
-| **Risk**                   | Bayesian Value at Risk (PyMC), stress testing, counterparty and aggregation modules.       |
-| **Execution**              | Liquidity forecasting, market-impact, order management, and routing modules.               |
+`POST /api/v1/backtest/` genuinely trains and evaluates real models for `rl_agent` and `ml_alpha` strategies via `app/services/backtest_runner.py` — see [docs/BACKTEST_RESULTS.md](docs/BACKTEST_RESULTS.md). The rest of these modules are part of the codebase and can be imported and run, but aren't yet wired into any live API response.
 
-These modules are part of the codebase and can be imported and run; they are not all connected to the live API responses, which by default are seeded.
+| Component                  | Details                                                                                    | Connected to the live API? |
+| :------------------------- | :----------------------------------------------------------------------------------------- | :------------------------- |
+| **Forecasting**            | Transformer, attention, and multi-horizon model implementations (PyTorch / TensorFlow).    | Yes — `ml_alpha` backtests |
+| **Reinforcement learning** | DDPG and PPO agents with replay buffers and custom trading and portfolio Gym environments. | Yes — `rl_agent` backtests |
+| **Generative models**      | GAN components for synthetic series and a regime model.                                    | Not yet                    |
+| **Risk**                   | Bayesian Value at Risk (PyMC), stress testing, counterparty and aggregation modules.       | Not yet                    |
+| **Execution**              | Liquidity forecasting, market-impact, order management, and routing modules.               | Not yet                    |
 
 ## Technology Stack
 
@@ -118,12 +118,18 @@ Backend (FastAPI)
   ├── Routers (/api/v1/*)  auth, portfolio, strategies, risk,
   │                        backtest, market-data, trading,
   │                        research, alternative-data, health
-  ├── Services            portfolio, strategy, risk, market-data, trading
+  ├── Services            portfolio, strategy, risk, market-data, trading,
+  │                        backtest_runner (trains/evaluates ai_models
+  │                        agents and forecasters for rl_agent/ml_alpha
+  │                        backtests - see docs/BACKTEST_RESULTS.md)
   ├── Auth                bcrypt + JWT (HS256), fail-closed secret
   └── Data layer          SQLAlchemy + Alembic (SQLite / MySQL / PostgreSQL)
                                                         ▼
-Research library (code/ai_models, code/backend/{analytics,risk,execution})
-  forecasting · reinforcement learning · generative · Bayesian risk · execution
+ai_models (code/ai_models)                  ◄── used by backtest_runner
+  forecasting · reinforcement learning (agents + Gym environments) · generative
+
+Research library (code/backend/{analytics,risk,execution})
+  Bayesian risk · execution (liquidity, market-impact) - not yet wired in
 ```
 
 The frontends are the source of presentation; the backend is the source of truth for data contracts. A dedicated contract test suite pins every response field the clients read so the tiers cannot drift apart silently.

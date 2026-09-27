@@ -248,7 +248,7 @@ class Portfolio:
             self.positions[symbol] = Position(symbol)
         return self.positions[symbol]
 
-    def update(self, prices: Dict[str, float]) -> Any:
+    def update(self, prices: Dict[str, float], time: Optional[datetime] = None) -> Any:
         """"""
         ""
         portfolio_value = self.cash
@@ -259,7 +259,7 @@ class Portfolio:
         self.equity = portfolio_value
         self.history.append(
             {
-                "time": datetime.now(),
+                "time": time or datetime.now(),
                 "cash": self.cash,
                 "equity": self.equity,
                 "positions": {s: p.to_dict() for s, p in self.positions.items()},
@@ -551,7 +551,7 @@ class BacktestEngine:
                 if date in df.index:
                     self.current_bar[symbol] = df.loc[date]
             current_prices = {s: bar["close"] for s, bar in self.current_bar.items()}
-            self.portfolio.update(current_prices)
+            self.portfolio.update(current_prices, time=self.current_time)
             strategy_fn(self.current_bar, self.portfolio, self)
             self._process_orders()
             self._update_performance()

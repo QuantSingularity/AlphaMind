@@ -30,6 +30,7 @@ class BacktestRun(Base):
 
     # pending | running | completed | failed
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    error_message: Mapped[str | None] = mapped_column(String(2000), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

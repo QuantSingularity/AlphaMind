@@ -1,14 +1,18 @@
 """
 Strategy service — CRUD for trading strategies and backtest lifecycle.
 
-Strategy parameters are stored as a JSON blob in the DB.  Performance
-metrics are either supplied at creation or refreshed by an async compute
-task (not yet wired to a live execution engine — see TODO below).
+Strategy parameters are stored as a JSON blob in the DB. Backtests are
+executed by app.services.backtest_runner (real simulations backed by
+ai_models for rl_agent/ml_alpha strategy types, and a simple rule-based
+BacktestEngine run for momentum/mean_reversion) via run_backtest_in_background,
+which FastAPI's BackgroundTasks runs after create_backtest's response is
+sent - see app/api/v1/routers/strategies.py.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import random
 import uuid
 from datetime import datetime, timezone
@@ -17,6 +21,8 @@ from typing import Any, Dict, List
 from db.repositories.backtest_repository import BacktestRepository
 from db.repositories.strategy_repository import StrategyRepository
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 
 class StrategyService:
@@ -148,8 +154,10 @@ class StrategyService:
         """
         Enqueue a new backtest run with status 'pending'.
 
-        A background worker (e.g. Celery / Ray task) should pick this up,
-        run the simulation, and update the record to 'completed'.
+        The caller (see app/api/v1/routers/strategies.py) is expected to
+        schedule run_backtest_in_background as a FastAPI BackgroundTask
+        right after this returns, which will move the run through
+        'running' to 'completed'/'failed'.
         """
         run = await self._backtest_repo.create(
             id=f"bt-{uuid.uuid4().hex[:8]}",
@@ -189,6 +197,23 @@ class StrategyService:
             max_drawdown=max_drawdown,
             total_trades=total_trades,
             win_rate=win_rate,
+            completed_at=datetime.now(timezone.utc),
+        )
+        return self._backtest_to_dict(updated) if updated else None
+
+    async def mark_backtest_running(self, backtest_id: str) -> Dict[str, Any] | None:
+        """Move a pending backtest to 'running' once execution actually starts."""
+        updated = await self._backtest_repo.update(backtest_id, status="running")
+        return self._backtest_to_dict(updated) if updated else None
+
+    async def fail_backtest(
+        self, backtest_id: str, error_message: str
+    ) -> Dict[str, Any] | None:
+        """Mark a backtest as failed, recording why."""
+        updated = await self._backtest_repo.update(
+            backtest_id,
+            status="failed",
+            error_message=error_message[:2000],
             completed_at=datetime.now(timezone.utc),
         )
         return self._backtest_to_dict(updated) if updated else None
@@ -240,6 +265,87 @@ class StrategyService:
             "totalTrades": r.total_trades,
             "winRate": r.win_rate,
             "status": r.status,
+            "errorMessage": getattr(r, "error_message", None),
             "createdAt": r.created_at.isoformat() if r.created_at else None,
             "completedAt": r.completed_at.isoformat() if r.completed_at else None,
         }
+
+
+async def run_backtest_in_background(
+    backtest_id: str,
+    strategy_id: str,
+    start_date: str,
+    end_date: str,
+    initial_capital: float,
+    session_factory: Any = None,
+) -> None:
+    """Actually run a backtest and write its result back to the DB.
+
+    Intended to be scheduled as a FastAPI BackgroundTask right after
+    StrategyService.create_backtest returns (see
+    app/api/v1/routers/strategies.py). Runs in its own DB session, since
+    the request-scoped session create_backtest used will already be
+    closed by the time this executes - BackgroundTasks run after the
+    response is sent.
+
+    session_factory defaults to db.session.AsyncSessionLocal (the real
+    production sessionmaker); tests pass their own so this can run
+    against an isolated test database instead of whatever DATABASE_URL
+    happens to be set to.
+    """
+    import asyncio
+
+    from app.services.backtest_runner import run_backtest
+
+    if session_factory is None:
+        from db.session import AsyncSessionLocal as session_factory  # noqa: N813
+
+    async with session_factory() as session:
+        service = StrategyService(session)
+        try:
+            strategy = await service._strategy_repo.get(strategy_id)
+            if strategy is None:
+                await service.fail_backtest(
+                    backtest_id, f"Strategy {strategy_id} no longer exists"
+                )
+                await session.commit()
+                return
+
+            await service.mark_backtest_running(backtest_id)
+            await session.commit()
+
+            strategy_type = strategy.strategy_type
+            try:
+                parameters = json.loads(strategy.parameters_json or "{}")
+            except (json.JSONDecodeError, TypeError):
+                parameters = {}
+
+            # run_backtest is synchronous and can run for tens of seconds
+            # (RL training, forecaster training) - push it to a worker
+            # thread so it doesn't block the event loop for other requests.
+            result = await asyncio.to_thread(
+                run_backtest,
+                strategy_type=strategy_type,
+                parameters=parameters,
+                start_date=start_date,
+                end_date=end_date,
+                initial_capital=initial_capital,
+            )
+
+            await service.complete_backtest(
+                backtest_id,
+                final_capital=result["final_capital"],
+                total_return=result["total_return"],
+                sharpe_ratio=result["sharpe_ratio"],
+                max_drawdown=result["max_drawdown"],
+                total_trades=result["total_trades"],
+                win_rate=result["win_rate"],
+            )
+            await session.commit()
+        except Exception as exc:  # noqa: BLE001 - always record, never crash the worker
+            logger.exception("Backtest %s failed", backtest_id)
+            await session.rollback()
+            async with session_factory() as fail_session:
+                fail_service = StrategyService(fail_session)
+                await fail_service.fail_backtest(backtest_id, str(exc))
+                await fail_session.commit()

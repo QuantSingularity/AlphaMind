@@ -1,11 +1,26 @@
-"""Backtesting router — run and retrieve backtest results."""
+"""Backtesting router — run and retrieve backtest results.
 
-import math
+POST /api/v1/backtest/ is the endpoint the web/mobile frontends actually
+call. It used to return entirely canned numbers from a hardcoded
+per-strategy lookup table (_STRATEGY_PERF below) - no simulation of any
+kind ran, and ai_models was never touched. It's now backed by
+app.services.backtest_runner.run_backtest_detailed, which genuinely
+simulates the strategy (training a real ai_models agent/forecaster for
+rl_agent/ml_alpha, or running rule-based logic for momentum/mean_reversion)
+and returns real results, including the equityCurve the frontend's
+Backtest page charts (see BacktestResult below - equityCurve was missing
+from this model entirely, so even though the old canned implementation
+computed one via _generate_equity_curve, FastAPI's response_model
+filtering silently dropped it from every response and the chart never had
+data).
+"""
+
 import uuid
-from datetime import datetime, timedelta
 from typing import List
 
-from fastapi import APIRouter
+from app.services import StrategyService, get_strategy_service
+from app.services.backtest_runner import run_backtest_detailed
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -30,6 +45,13 @@ class TradeRecord(BaseModel):
     pnl: float
 
 
+class EquityPoint(BaseModel):
+    date: str
+    equity: float
+    benchmark: float
+    drawdown: float
+
+
 class BacktestResult(BaseModel):
     id: str
     strategyId: str
@@ -51,148 +73,47 @@ class BacktestResult(BaseModel):
     avgLoss: float
     bestMonth: float
     worstMonth: float
+    equityCurve: List[EquityPoint] = []
 
-
-# Strategy performance lookup (deterministic values)
-_STRATEGY_PERF = {
-    "strat-001": {
-        "totalReturn": 0.487,
-        "annualisedReturn": 0.384,
-        "sharpeRatio": 2.31,
-        "sortinoRatio": 3.18,
-        "calmarRatio": 4.07,
-        "maxDrawdown": -0.089,
-        "winRate": 0.642,
-        "profitFactor": 3.8,
-        "totalTrades": 312,
-        "avgWin": 1420.0,
-        "avgLoss": -520.0,
-        "bestMonth": 0.118,
-        "worstMonth": -0.031,
-    },
-    "strat-002": {
-        "totalReturn": 0.297,
-        "annualisedReturn": 0.248,
-        "sharpeRatio": 1.94,
-        "sortinoRatio": 2.67,
-        "calmarRatio": 2.33,
-        "maxDrawdown": -0.127,
-        "winRate": 0.591,
-        "profitFactor": 2.9,
-        "totalTrades": 421,
-        "avgWin": 980.0,
-        "avgLoss": -430.0,
-        "bestMonth": 0.087,
-        "worstMonth": -0.048,
-    },
-    "strat-003": {
-        "totalReturn": 0.432,
-        "annualisedReturn": 0.362,
-        "sharpeRatio": 2.71,
-        "sortinoRatio": 3.72,
-        "calmarRatio": 5.59,
-        "maxDrawdown": -0.077,
-        "winRate": 0.674,
-        "profitFactor": 4.2,
-        "totalTrades": 284,
-        "avgWin": 1680.0,
-        "avgLoss": -490.0,
-        "bestMonth": 0.132,
-        "worstMonth": -0.024,
-    },
-    "strat-004": {
-        "totalReturn": 0.226,
-        "annualisedReturn": 0.192,
-        "sharpeRatio": 1.72,
-        "sortinoRatio": 2.31,
-        "calmarRatio": 1.46,
-        "maxDrawdown": -0.154,
-        "winRate": 0.553,
-        "profitFactor": 2.4,
-        "totalTrades": 518,
-        "avgWin": 760.0,
-        "avgLoss": -380.0,
-        "bestMonth": 0.071,
-        "worstMonth": -0.062,
-    },
-}
 
 _BACKTEST_STORE: List[dict] = []
 
 
-def _generate_equity_curve(
-    start_date: str,
-    end_date: str,
-    initial_capital: float,
-    total_return: float,
-    vol: float = 0.015,
-) -> List[dict]:
-    start = datetime.fromisoformat(start_date.replace("Z", ""))
-    end = datetime.fromisoformat(end_date.replace("Z", ""))
-    days = max((end - start).days, 1)
-    daily_return = math.pow(1 + total_return, 1 / days) - 1
-
-    equity = initial_capital
-    bench = initial_capital
-    points = []
-    for i in range(days):
-        noise = math.sin(i * 0.29) * vol + math.cos(i * 0.63) * vol * 0.5
-        equity *= 1 + daily_return + noise
-        bench *= 1 + math.sin(i * 0.38) * 0.004 + 0.0003
-        drawdown = min(
-            0.0, (equity - initial_capital * (1 + total_return * i / days)) / equity
-        )
-        ts = (start + timedelta(days=i)).strftime("%Y-%m-%d")
-        points.append(
-            {
-                "date": ts,
-                "equity": round(equity, 2),
-                "benchmark": round(bench, 2),
-                "drawdown": round(drawdown * 100, 3),
-            }
-        )
-    return points
-
-
 @router.post("/", response_model=BacktestResult, status_code=201)
-async def run_backtest(payload: BacktestRequest):
-    """Run a backtest for a strategy."""
-    perf = _STRATEGY_PERF.get(
-        payload.strategyId,
-        {
-            "totalReturn": 0.15,
-            "annualisedReturn": 0.13,
-            "sharpeRatio": 1.2,
-            "sortinoRatio": 1.5,
-            "calmarRatio": 1.1,
-            "maxDrawdown": -0.10,
-            "winRate": 0.55,
-            "profitFactor": 1.8,
-            "totalTrades": 200,
-            "avgWin": 800.0,
-            "avgLoss": -400.0,
-            "bestMonth": 0.06,
-            "worstMonth": -0.04,
-        },
-    )
+async def run_backtest(
+    payload: BacktestRequest,
+    svc: StrategyService = Depends(get_strategy_service),
+):
+    """Run a backtest for a strategy.
 
-    result_id = f"bt-{uuid.uuid4().hex[:8]}"
-    final_capital = round(payload.initialCapital * (1 + perf["totalReturn"]), 2)
+    This is synchronous - training a small ai_models agent/forecaster for
+    rl_agent/ml_alpha strategies takes anywhere from under a second to
+    tens of seconds depending on the strategy's `episodes`/`epochs`
+    parameters, so this call can be slow. For a fire-and-forget flow with
+    polling instead, see POST /api/v1/strategies/backtest.
+    """
+    strategy = await svc.get_strategy(payload.strategyId)
+    if strategy is None:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+
+    try:
+        metrics = run_backtest_detailed(
+            strategy_type=strategy["type"],
+            parameters=strategy["parameters"],
+            start_date=payload.startDate,
+            end_date=payload.endDate,
+            initial_capital=payload.initialCapital,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     result = {
-        "id": result_id,
+        "id": f"bt-{uuid.uuid4().hex[:8]}",
         "strategyId": payload.strategyId,
         "startDate": payload.startDate,
         "endDate": payload.endDate,
         "initialCapital": payload.initialCapital,
-        "finalCapital": final_capital,
-        "equityCurve": _generate_equity_curve(
-            payload.startDate,
-            payload.endDate,
-            payload.initialCapital,
-            perf["totalReturn"],
-        ),
-        **perf,
+        **metrics,
     }
     _BACKTEST_STORE.append(result)
     return result
