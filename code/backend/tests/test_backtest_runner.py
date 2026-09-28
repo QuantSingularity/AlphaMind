@@ -101,11 +101,22 @@ class TestRLAgentBacktest:
         assert result["final_capital"] > 0
         assert result["total_trades"] >= 0
 
-    def test_unknown_algorithm_falls_back_to_ddpg(self) -> None:
+    def test_unknown_algorithm_falls_back_to_ddpg(self, monkeypatch) -> None:
+        import builtins
+
+        real_import = builtins.__import__
+
+        def fake_import(name, *args, **kwargs):
+            if name == "stable_baselines3" or name.startswith("stable_baselines3."):
+                raise ImportError
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", fake_import)
+
         result = run_backtest(
             strategy_type="rl_agent",
             parameters={
-                "algorithm": "ppo",  # requires stable-baselines3; not installed in CI
+                "algorithm": "ppo",
                 "n_assets": 2,
                 "episodes": 1,
                 "max_steps": 10,
