@@ -16,10 +16,10 @@ output "db_username" {
 
 output "db_instance_identifier" {
   description = "Identifier of the RDS instance"
-  value       = try(aws_db_instance.main[0].identifier, "")
+  value       = try(aws_db_instance.main.identifier, "")
 }
 
 output "db_instance_arn" {
   description = "ARN of the RDS instance"
-  value       = try(aws_db_instance.main[0].arn, "")
+  value       = try(aws_db_instance.main.arn, "")
 }

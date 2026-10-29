@@ -52,6 +52,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "cloudtrail" {
     id     = "cloudtrail_lifecycle"
     status = "Enabled"
 
+    filter {}
+
     transition {
       days          = 30
       storage_class = "STANDARD_IA"
@@ -135,7 +137,7 @@ resource "aws_s3_bucket_policy" "cloudtrail" {
 # CloudWatch Log Group for CloudTrail
 resource "aws_cloudwatch_log_group" "cloudtrail" {
   name              = "/aws/cloudtrail/${var.app_name}-${var.environment}"
-  retention_in_days = 2555 # 7 years for financial compliance
+  retention_in_days = 2557 # 7 years for financial compliance
   kms_key_id        = var.kms_key_id
 
   tags = {
@@ -271,7 +273,7 @@ resource "aws_cloudtrail" "main" {
 }
 
 # CloudWatch metric filters for security monitoring
-resource "aws_cloudwatch_metric_filter" "root_usage" {
+resource "aws_cloudwatch_log_metric_filter" "root_usage" {
   name           = "${var.app_name}-${var.environment}-root-usage"
   log_group_name = aws_cloudwatch_log_group.cloudtrail.name
   pattern        = "{ ($.userIdentity.type = \"Root\") && ($.userIdentity.invokedBy NOT EXISTS) && ($.eventType != \"AwsServiceEvent\") }"
@@ -283,7 +285,7 @@ resource "aws_cloudwatch_metric_filter" "root_usage" {
   }
 }
 
-resource "aws_cloudwatch_metric_filter" "unauthorized_api_calls" {
+resource "aws_cloudwatch_log_metric_filter" "unauthorized_api_calls" {
   name           = "${var.app_name}-${var.environment}-unauthorized-api-calls"
   log_group_name = aws_cloudwatch_log_group.cloudtrail.name
   pattern        = "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") }"
@@ -295,7 +297,7 @@ resource "aws_cloudwatch_metric_filter" "unauthorized_api_calls" {
   }
 }
 
-resource "aws_cloudwatch_metric_filter" "no_mfa_console_signin" {
+resource "aws_cloudwatch_log_metric_filter" "no_mfa_console_signin" {
   name           = "${var.app_name}-${var.environment}-no-mfa-console-signin"
   log_group_name = aws_cloudwatch_log_group.cloudtrail.name
   pattern        = "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") }"

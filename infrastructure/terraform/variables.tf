@@ -167,9 +167,14 @@ variable "application_port" {
 
 # Database Backup Configuration
 variable "db_backup_retention_period" {
-  description = "Number of days to retain database backups"
+  description = "Days to keep RDS automated backups (AWS allows at most 35). Long-term retention is handled by the AWS Backup plan: see backup_retention_days"
   type        = number
-  default     = 2555 # 7 years for financial compliance
+  default     = 35
+
+  validation {
+    condition     = var.db_backup_retention_period >= 0 && var.db_backup_retention_period <= 35
+    error_message = "db_backup_retention_period must be between 0 and 35 days (RDS automated backup limit). Use backup_retention_days for long-term retention."
+  }
 }
 
 variable "db_backup_window" {
@@ -244,9 +249,14 @@ variable "s3_lifecycle_rules" {
 
 # Monitoring Configuration
 variable "log_retention_days" {
-  description = "CloudWatch log retention period in days"
+  description = "CloudWatch log retention period in days (CloudWatch only accepts specific values)"
   type        = number
-  default     = 2555 # 7 years for financial compliance
+  default     = 2557 # 7 years for financial compliance
+
+  validation {
+    condition     = contains([0, 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096, 1827, 2192, 2557, 2922, 3288, 3653], var.log_retention_days)
+    error_message = "log_retention_days must be a retention value CloudWatch Logs supports (for example 365, 731, 2192, 2557 or 3653)."
+  }
 }
 
 variable "alert_email_addresses" {
