@@ -211,28 +211,20 @@ resource "aws_cloudtrail" "main" {
   enable_log_file_validation    = var.enable_log_file_validation
   kms_key_id                    = var.kms_key_id
 
-  # Event selectors for comprehensive logging
-  event_selector {
-    read_write_type                  = "All"
-    include_management_events        = true
-    exclude_management_event_sources = []
-
-    data_resource {
-      type   = "AWS::S3::Object"
-      values = ["arn:aws:s3:::*/*"]
-    }
-
-    data_resource {
-      type   = "AWS::Lambda::Function"
-      values = ["arn:aws:lambda:*"]
+  # Advanced event selectors (cannot be combined with classic event_selector blocks).
+  # Management events must be logged explicitly; insight_selector below requires them.
+  advanced_event_selector {
+    name = "Log all management events"
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Management"]
     }
   }
 
-  # Advanced event selectors for detailed logging
   advanced_event_selector {
     name = "Log all S3 data events"
     field_selector {
-      field  = "category"
+      field  = "eventCategory"
       equals = ["Data"]
     }
     field_selector {
@@ -244,7 +236,7 @@ resource "aws_cloudtrail" "main" {
   advanced_event_selector {
     name = "Log all Lambda data events"
     field_selector {
-      field  = "category"
+      field  = "eventCategory"
       equals = ["Data"]
     }
     field_selector {
