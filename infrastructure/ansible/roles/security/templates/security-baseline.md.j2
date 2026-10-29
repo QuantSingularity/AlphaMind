@@ -1,0 +1,35 @@
+# Security baseline: {{ ansible_hostname }}
+
+This host is configured by the `security` Ansible role. Local edits to the files it
+manages are overwritten on the next run.
+
+## Access control
+
+| Setting               | Value                                           |
+| :-------------------- | :---------------------------------------------- |
+| Minimum password      | {{ password_min_length }} characters, {{ password_min_classes }} character classes |
+| Account lockout       | {{ account_lockout_attempts }} failed attempts, {{ account_lockout_time }} s |
+| Session timeout       | {{ session_timeout }} s                         |
+| Management network    | {{ management_network }}                        |
+| Trusted networks      | {{ trusted_networks | join(', ') }}              |
+
+## Logging and monitoring
+
+| Setting                | Value                                          |
+| :--------------------- | :--------------------------------------------- |
+| Audit log retention    | {{ audit_log_retention_days }} days (max {{ audit_log_max_size }} per file) |
+| SIEM forwarding        | {{ siem_protocol }}://{{ siem_server }}:{{ siem_port }} |
+| File integrity (AIDE)  | checked {{ aide_check_frequency }}              |
+| Vulnerability scanning | {{ vuln_scan_frequency }}, results to {{ vuln_scan_email }} |
+| Compliance reporting   | {{ compliance_report_frequency }}, to {{ compliance_report_email }} |
+| Incident response      | {{ incident_response_team }}, escalate after {{ incident_escalation_time }} min |
+
+## Encryption
+
+| Setting                | Value                                          |
+| :--------------------- | :--------------------------------------------- |
+| Data encryption role   | {{ 'enabled' if enable_encryption else 'disabled' }} |
+| Backup encryption      | {{ 'enabled' if enable_backup_encryption else 'disabled' }} |
+| Backup retention       | {{ backup_retention_days }} days               |
+| TLS protocols          | {{ ssl_protocols }}                            |
+| TLS ciphers            | `{{ ssl_cipher_suite }}`                       |

@@ -1,0 +1,25 @@
+# Managed by Ansible (security role); local changes will be overwritten.
+LocalSocket /var/run/clamav/clamd.ctl
+FixStaleSocket true
+LocalSocketGroup clamav
+LocalSocketMode 660
+User clamav
+PidFile /var/run/clamav/clamd.pid
+DatabaseDirectory /var/lib/clamav
+
+LogFile /var/log/clamav/clamav.log
+LogTime true
+LogRotate true
+LogSyslog false
+Foreground false
+
+ScanMail true
+ScanArchive true
+ScanPDF true
+FollowDirectorySymlinks false
+FollowFileSymlinks false
+MaxDirectoryRecursion 15
+MaxThreads 12
+MaxConnectionQueueLength 15
+ReadTimeout 180
+SelfCheck 3600

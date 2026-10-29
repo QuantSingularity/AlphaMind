@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - namespace.yaml
 
 namespace: alphamind-staging
 
@@ -26,9 +27,6 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 2
-      - op: replace
-        path: /spec/template/spec/containers/0/env/1/value
-        value: staging
   - target:
       kind: Ingress
       name: alphamind-ingress
@@ -39,3 +37,29 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: staging.alphamind.example.com
+  - target:
+      kind: ConfigMap
+      name: alphamind-config
+    patch: |-
+      - op: replace
+        path: /data/API_URL
+        value: http://staging-alphamind-backend
+      - op: replace
+        path: /data/REDIS_HOST
+        value: staging-alphamind-redis
+      - op: replace
+        path: /data/DATABASE_HOST
+        value: staging-alphamind-database
+      - op: replace
+        path: /data/ALLOWED_ORIGINS
+        value: https://staging.alphamind.example.com
+  - target:
+      kind: PrometheusRule
+      name: alphamind-alerts
+    patch: |-
+      - op: replace
+        path: /spec/groups/0/rules/5/expr
+        value: rate(kube_pod_container_status_restarts_total{namespace="alphamind-staging"}[15m]) > 0
+      - op: replace
+        path: /spec/groups/0/rules/5/annotations/description
+        value: A pod in alphamind-staging has restarted more than once in 15 minutes.

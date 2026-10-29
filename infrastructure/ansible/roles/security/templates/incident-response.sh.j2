@@ -1,0 +1,64 @@
+#!/bin/bash
+# Managed by Ansible (security role); local changes will be overwritten.
+# Collects volatile evidence and notifies the incident response team.
+# Read-only: it does not block traffic, kill processes or modify the host.
+#
+# Usage: incident-response.sh [-m "description of the incident"]
+set -euo pipefail
+
+TEAM_EMAIL="{{ incident_response_team | default('security@company.com') }}"
+ESCALATION_MINUTES={{ incident_escalation_time | default(30) }}
+EVIDENCE_ROOT="/var/log/incident-response"
+HOST_NAME=$(hostname -f 2>/dev/null || hostname)
+TIMESTAMP=$(date -u '+%Y%m%dT%H%M%SZ')
+EVIDENCE_DIR="${EVIDENCE_ROOT}/${TIMESTAMP}"
+DESCRIPTION="manual invocation"
+
+usage() {
+    echo "Usage: $0 [-m description]" >&2
+    exit 2
+}
+
+while getopts "m:" opt; do
+    case "$opt" in
+        m) DESCRIPTION="$OPTARG" ;;
+        *) usage ;;
+    esac
+done
+
+umask 077
+mkdir -p "$EVIDENCE_DIR"
+
+# Evidence collection must continue even if a single command fails.
+collect() {
+    local name="$1"
+    shift
+    { "$@" 2>&1 || true; } > "${EVIDENCE_DIR}/${name}.txt"
+}
+
+collect date date -u
+collect logged-in-users who -a
+collect last-logins last -n 50
+collect processes ps auxww
+collect connections ss -tunap
+collect listening-ports ss -tulnp
+collect auth-log tail -n 500 /var/log/auth.log
+collect fail2ban fail2ban-client status
+collect firewall ufw status verbose
+collect audit-recent ausearch --start recent
+collect file-integrity aide --check
+
+tar -czf "${EVIDENCE_DIR}.tar.gz" -C "$EVIDENCE_ROOT" "$TIMESTAMP"
+sha256sum "${EVIDENCE_DIR}.tar.gz" > "${EVIDENCE_DIR}.tar.gz.sha256"
+
+SUBJECT="[INCIDENT] ${HOST_NAME}: ${DESCRIPTION}"
+logger -p auth.crit -t incident-response "${SUBJECT} (evidence: ${EVIDENCE_DIR}.tar.gz)"
+{
+    echo "Host:        ${HOST_NAME}"
+    echo "Time (UTC):  ${TIMESTAMP}"
+    echo "Description: ${DESCRIPTION}"
+    echo "Evidence:    ${EVIDENCE_DIR}.tar.gz"
+    echo "Escalate if not acknowledged within ${ESCALATION_MINUTES} minutes."
+} | mail -s "$SUBJECT" "$TEAM_EMAIL" || echo "WARNING: could not send e-mail to ${TEAM_EMAIL}" >&2
+
+echo "Evidence collected in ${EVIDENCE_DIR}.tar.gz"

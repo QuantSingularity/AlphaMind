@@ -1,0 +1,12 @@
+# Managed by Ansible (security role); local changes will be overwritten.
+# Accurate time is required for audit trail integrity (PCI DSS 10.4, SOX).
+{% for server in ntp_servers %}
+server {{ server }} iburst
+{% endfor %}
+
+driftfile /var/lib/chrony/chrony.drift
+makestep 1.0 3
+rtcsync
+leapsectz right/UTC
+logdir /var/log/chrony
+log tracking measurements statistics

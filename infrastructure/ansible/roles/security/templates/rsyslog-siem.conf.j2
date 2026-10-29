@@ -1,0 +1,14 @@
+# Managed by Ansible (security role); local changes will be overwritten.
+# Forward all logs to the SIEM ({{ siem_protocol }}://{{ siem_server }}:{{ siem_port }}).
+# The disk-assisted queue keeps messages while the SIEM is unreachable.
+*.* action(
+    type="omfwd"
+    target="{{ siem_server }}"
+    port="{{ siem_port }}"
+    protocol="{{ siem_protocol }}"
+    action.resumeRetryCount="-1"
+    queue.type="LinkedList"
+    queue.filename="siem_forward"
+    queue.maxDiskSpace="1g"
+    queue.saveOnShutdown="on"
+)

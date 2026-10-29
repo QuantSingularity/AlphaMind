@@ -1,0 +1,45 @@
+---
+# Backup encryption key and helper.
+# Included from main.yml when enable_backup_encryption is true.
+
+- name: Install OpenSSL for backup encryption
+  ansible.builtin.package:
+    name: openssl
+    state: present
+
+- name: Ensure the backup key directory exists
+  ansible.builtin.file:
+    path: "{{ backup_encryption_key_file | dirname }}"
+    state: directory
+
+# The key is only generated when it does not exist yet, so re-running the role never
+# rotates it (which would make existing backups unreadable).
+- name: Generate the backup encryption key
+  ansible.builtin.shell: umask 077 && openssl rand -base64 64 > "{{ backup_encryption_key_file }}"
+  args:
+    creates: "{{ backup_encryption_key_file }}"
+  no_log: true
+
+- name: Restrict access to the backup encryption key
+  ansible.builtin.file:
+    path: "{{ backup_encryption_key_file }}"
+    owner: root
+    group: root
+    mode: "0400"
+
+- name: Install the backup encryption helper
+  ansible.builtin.copy:
+    dest: /usr/local/bin/backup-encrypt.sh
+    owner: root
+    group: root
+    mode: "0750"
+    content: |
+      #!/bin/bash
+      # Managed by Ansible (security role); local changes will be overwritten.
+      # Usage: backup-encrypt.sh <file>   writes <file>.enc (AES-256); the original is kept.
+      set -euo pipefail
+      if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
+          echo "Usage: $0 <file>" >&2
+          exit 2
+      fi
+      openssl enc -aes-256-cbc -salt -pbkdf2 -pass "file:{{ backup_encryption_key_file }}" -in "$1" -out "$1.enc"

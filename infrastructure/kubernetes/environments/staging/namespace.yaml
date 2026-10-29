@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alphamind-staging
+  labels:
+    name: alphamind-staging
+    environment: staging
+    app.kubernetes.io/part-of: alphamind-platform

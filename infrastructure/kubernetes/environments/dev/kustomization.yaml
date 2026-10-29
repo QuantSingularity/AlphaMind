@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - namespace.yaml
 
 namespace: alphamind-dev
 
@@ -26,9 +27,6 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 1
-      - op: replace
-        path: /spec/template/spec/containers/0/env/1/value
-        value: development
   - target:
       kind: Ingress
       name: alphamind-ingress
@@ -59,3 +57,29 @@ patches:
       - op: replace
         path: /spec/maxReplicas
         value: 3
+  - target:
+      kind: ConfigMap
+      name: alphamind-config
+    patch: |-
+      - op: replace
+        path: /data/API_URL
+        value: http://dev-alphamind-backend
+      - op: replace
+        path: /data/REDIS_HOST
+        value: dev-alphamind-redis
+      - op: replace
+        path: /data/DATABASE_HOST
+        value: dev-alphamind-database
+      - op: replace
+        path: /data/ALLOWED_ORIGINS
+        value: https://dev.alphamind.example.com
+  - target:
+      kind: PrometheusRule
+      name: alphamind-alerts
+    patch: |-
+      - op: replace
+        path: /spec/groups/0/rules/5/expr
+        value: rate(kube_pod_container_status_restarts_total{namespace="alphamind-dev"}[15m]) > 0
+      - op: replace
+        path: /spec/groups/0/rules/5/annotations/description
+        value: A pod in alphamind-dev has restarted more than once in 15 minutes.

@@ -1,0 +1,42 @@
+# Managed by Ansible (security role); local changes will be overwritten.
+# AIDE file integrity monitoring (PCI DSS 11.5, SOX). Checks run {{ aide_check_frequency }};
+# reports are addressed to {{ aide_report_email }}.
+database_in=file:/var/lib/aide/aide.db
+database_out=file:/var/lib/aide/aide.db.new
+database_new=file:/var/lib/aide/aide.db.new
+gzip_dbout=yes
+log_level=warning
+report_level=changed_attributes
+
+# Rule groups
+NORMAL = p+i+n+u+g+s+m+c+sha512
+DIR = p+i+n+u+g
+PERMS = p+u+g
+LOGS = p+u+g+n+S
+
+# Monitored locations
+/boot NORMAL
+/bin NORMAL
+/sbin NORMAL
+/lib NORMAL
+/usr/bin NORMAL
+/usr/sbin NORMAL
+/usr/lib NORMAL
+/usr/local/bin NORMAL
+/usr/local/sbin NORMAL
+/etc NORMAL
+/root NORMAL
+/var/log LOGS
+
+# Expected to change
+!/etc/mtab
+!/etc/resolv.conf
+!/var/log/journal
+!/var/lib/aide
+!/var/cache
+!/var/tmp
+!/proc
+!/sys
+!/dev
+!/run
+!/tmp

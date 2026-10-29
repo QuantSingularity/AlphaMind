@@ -1,0 +1,57 @@
+#!/bin/bash
+# Managed by Ansible (security role); local changes will be overwritten.
+# Produces the periodic ({{ compliance_report_frequency }}) compliance report and e-mails it.
+set -uo pipefail
+
+REPORT_DIR="/var/log/compliance-reports"
+REPORT_EMAIL="{{ compliance_report_email | default('compliance@company.com') }}"
+HOST_NAME=$(hostname -f 2>/dev/null || hostname)
+TIMESTAMP=$(date '+%Y%m%d-%H%M%S')
+REPORT="${REPORT_DIR}/periodic-${TIMESTAMP}.txt"
+
+mkdir -p "$REPORT_DIR"
+chmod 0750 "$REPORT_DIR"
+
+service_state() {
+    systemctl is-active "$1" 2> /dev/null || echo "inactive"
+}
+
+count_matches() {
+    local file="$1" pattern="$2"
+    if [ -f "$file" ]; then
+        grep -c "$pattern" "$file" || true
+    else
+        echo 0
+    fi
+}
+
+{
+    echo "Compliance report for ${HOST_NAME}"
+    echo "Generated: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo
+    echo "Security services"
+    for svc in auditd clamav-daemon fail2ban chrony rsyslog; do
+        printf '  %-16s %s\n' "$svc" "$(service_state "$svc")"
+    done
+    echo "  firewall         $(ufw status 2> /dev/null | head -n 1)"
+    if [ -f /var/lib/aide/aide.db ]; then
+        echo "  aide database    present"
+    else
+        echo "  aide database    MISSING"
+    fi
+    echo
+    echo "Activity (all time, from the local logs)"
+    echo "  compliance alerts:   $(count_matches /var/log/compliance-monitor.log 'ALERT')"
+    echo "  CRITICAL findings:   $(count_matches /var/log/vulnerability-scan.log 'CRITICAL')"
+    echo "  HIGH findings:       $(count_matches /var/log/vulnerability-scan.log 'HIGH')"
+    echo
+    echo "Policy in force"
+    echo "  audit log retention: {{ audit_log_retention_days }} days"
+    echo "  minimum password:    {{ password_min_length }} characters"
+    echo "  account lockout:     {{ account_lockout_attempts }} attempts / {{ account_lockout_time }}s"
+    echo "  session timeout:     {{ session_timeout }}s"
+    echo "  SIEM forwarding:     {{ siem_protocol }}://{{ siem_server }}:{{ siem_port }}"
+} > "$REPORT"
+
+mail -s "Compliance report: ${HOST_NAME}" "$REPORT_EMAIL" < "$REPORT" || echo "WARNING: could not send e-mail to ${REPORT_EMAIL}" >&2
+echo "Report written to ${REPORT}"

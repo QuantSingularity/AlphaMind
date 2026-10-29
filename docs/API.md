@@ -14,7 +14,7 @@ All endpoints exist under a versioned prefix (`/api/v1/...`). Non-versioned alia
 
 ## Health
 
-```
+```text
 GET /health
 GET /
 ```
@@ -27,7 +27,7 @@ Tokens are HS256 JWTs. Send the token as `Authorization: Bearer <token>` on subs
 
 ### Register
 
-```
+```text
 POST /api/auth/register
 {
   "email": "trader@example.com",   // email or username
@@ -39,7 +39,7 @@ POST /api/auth/register
 
 ### Login
 
-```
+```text
 POST /api/auth/login
 { "email": "trader@example.com", "password": "a-strong-password" }
 → 200 { "token": "<jwt>", "user": { ... } }
@@ -48,14 +48,14 @@ POST /api/auth/login
 
 ### Refresh / Profile
 
-```
+```text
 POST /api/auth/refresh   → { "token": "<jwt>" }
 GET  /api/auth/profile   → { "id", "email", "name" }
 ```
 
 ## Portfolio - `/api/v1/portfolio`
 
-```
+```text
 GET /api/v1/portfolio/
 → {
     "totalValue": number,
@@ -80,7 +80,7 @@ GET /api/v1/portfolio/performance
 
 ## Strategies - `/api/v1/strategies`
 
-```
+```text
 GET /api/v1/strategies/
 → [ {
     "id", "name", "status",
@@ -96,7 +96,7 @@ GET /api/v1/strategies/{id}/equity-curve
 
 ## Risk - `/api/v1/risk`
 
-```
+```text
 GET /api/v1/risk/metrics
 → {
     "var": number,           // value at risk (% of NAV)
@@ -118,7 +118,7 @@ GET /api/v1/risk/radar
 
 ## Backtest - `/api/v1/backtest`
 
-```
+```text
 POST /api/v1/backtest/
 {
   "strategyId": string,
@@ -149,7 +149,7 @@ one of `momentum` / `mean_reversion` / `ml_alpha` / `rl_agent`.
 
 ### Alternative: async backtest via the strategies router
 
-```
+```text
 POST /api/v1/strategies/backtest
 { "strategyId": string, "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "initialCapital": number }
 → 202 { "id", "strategyId", "status": "pending", ... }
@@ -164,7 +164,7 @@ smaller field set: `finalCapital`, `totalReturn`, `sharpeRatio`, `maxDrawdown`,
 
 ## Market Data - `/api/v1/market-data`
 
-```
+```text
 GET /api/v1/market-data/quotes
 → [ {
     "ticker", "timestamp", "bid", "ask", "last",
@@ -185,7 +185,7 @@ GET /api/v1/market-data/historical/{ticker}?days=90
 
 Trading is simulated in-process; there is no live broker.
 
-```
+```text
 GET    /api/v1/trading/orders            → [ Order ]
 GET    /api/v1/trading/orders/{id}       → Order
 POST   /api/v1/trading/orders            → 201 Order
@@ -211,7 +211,7 @@ Order:
 
 ## Research - `/api/v1/research`
 
-```
+```text
 GET /api/v1/research/papers
 → [ { "id", "title", "authors": [string], "abstract", "category", "year", "url?" } ]
 ```
@@ -220,7 +220,7 @@ Also available as `/api/research/papers`.
 
 ## Alternative Data - `/api/v1/alternative-data`
 
-```
+```text
 GET /api/v1/alternative-data/sources
 → [ {
     "id", "name",

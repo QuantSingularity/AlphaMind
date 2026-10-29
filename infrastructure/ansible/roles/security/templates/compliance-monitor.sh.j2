@@ -27,28 +27,32 @@ send_alert() {
 }
 
 check_failed_logins() {
-    local failed_logins=$(grep "authentication failure" /var/log/auth.log | grep "$(date '+%b %d')" | wc -l)
+    local failed_logins
+    failed_logins=$(grep "authentication failure" /var/log/auth.log | grep "$(date '+%b %d')" | wc -l)
     if [ "$failed_logins" -gt "$FAILED_LOGIN_THRESHOLD" ]; then
         send_alert "Security Alert: Excessive Failed Logins" "Host: $HOSTNAME has $failed_logins failed login attempts today (threshold: $FAILED_LOGIN_THRESHOLD)"
     fi
 }
 
 check_disk_usage() {
-    local disk_usage=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
+    local disk_usage
+    disk_usage=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
     if [ "$disk_usage" -gt "$DISK_USAGE_THRESHOLD" ]; then
         send_alert "Resource Alert: High Disk Usage" "Host: $HOSTNAME disk usage is $disk_usage% (threshold: $DISK_USAGE_THRESHOLD%)"
     fi
 }
 
 check_memory_usage() {
-    local memory_usage=$(free | awk 'NR==2{printf "%.0f", $3*100/$2}')
+    local memory_usage
+    memory_usage=$(free | awk 'NR==2{printf "%.0f", $3*100/$2}')
     if [ "$memory_usage" -gt "$MEMORY_USAGE_THRESHOLD" ]; then
         send_alert "Resource Alert: High Memory Usage" "Host: $HOSTNAME memory usage is $memory_usage% (threshold: $MEMORY_USAGE_THRESHOLD%)"
     fi
 }
 
 check_cpu_usage() {
-    local cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | awk -F'%' '{print $1}')
+    local cpu_usage
+    cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | awk -F'%' '{print $1}')
     if (( $(echo "$cpu_usage > $CPU_USAGE_THRESHOLD" | bc -l) )); then
         send_alert "Resource Alert: High CPU Usage" "Host: $HOSTNAME CPU usage is $cpu_usage% (threshold: $CPU_USAGE_THRESHOLD%)"
     fi
@@ -73,12 +77,16 @@ check_firewall_status() {
 }
 
 check_ssl_certificates() {
-    local cert_files=$(find /etc/ssl/certs/ -name "*.crt" -o -name "*.pem" 2>/dev/null)
+    local cert_files
+    cert_files=$(find /etc/ssl/certs/ -name "*.crt" -o -name "*.pem" 2>/dev/null)
     for cert in $cert_files; do
-        local expiry_date=$(openssl x509 -in "$cert" -noout -enddate 2>/dev/null | cut -d= -f2)
+        local expiry_date
+        expiry_date=$(openssl x509 -in "$cert" -noout -enddate 2>/dev/null | cut -d= -f2)
         if [ -n "$expiry_date" ]; then
-            local expiry_epoch=$(date -d "$expiry_date" +%s)
-            local current_epoch=$(date +%s)
+            local expiry_epoch
+            expiry_epoch=$(date -d "$expiry_date" +%s)
+            local current_epoch
+            current_epoch=$(date +%s)
             local days_until_expiry=$(( (expiry_epoch - current_epoch) / 86400 ))
 
             if [ "$days_until_expiry" -lt 30 ]; then
@@ -92,7 +100,8 @@ check_log_rotation() {
     local log_files=("/var/log/auth.log" "/var/log/syslog" "/var/log/audit/audit.log")
     for log_file in "${log_files[@]}"; do
         if [ -f "$log_file" ]; then
-            local file_size=$(stat -c%s "$log_file")
+            local file_size
+            file_size=$(stat -c%s "$log_file")
             local max_size=$((100 * 1024 * 1024))  # 100MB
             if [ "$file_size" -gt "$max_size" ]; then
                 send_alert "Compliance Alert: Log File Too Large" "Host: $HOSTNAME log file $log_file is larger than 100MB - may affect audit trail integrity"
@@ -104,7 +113,8 @@ check_log_rotation() {
 check_backup_status() {
     local backup_log="/var/log/backup.log"
     if [ -f "$backup_log" ]; then
-        local last_backup=$(tail -1 "$backup_log" | grep "$(date -d '1 day ago' '+%Y-%m-%d')")
+        local last_backup
+        last_backup=$(tail -1 "$backup_log" | grep "$(date -d '1 day ago' '+%Y-%m-%d')")
         if [ -z "$last_backup" ]; then
             send_alert "Compliance Alert: Backup Failure" "Host: $HOSTNAME backup was not completed in the last 24 hours"
         fi
@@ -114,7 +124,8 @@ check_backup_status() {
 check_intrusion_detection() {
     local fail2ban_log="/var/log/fail2ban.log"
     if [ -f "$fail2ban_log" ]; then
-        local recent_bans=$(grep "$(date '+%Y-%m-%d')" "$fail2ban_log" | grep "Ban" | wc -l)
+        local recent_bans
+        recent_bans=$(grep "$(date '+%Y-%m-%d')" "$fail2ban_log" | grep "Ban" | wc -l)
         if [ "$recent_bans" -gt 10 ]; then
             send_alert "Security Alert: High Intrusion Activity" "Host: $HOSTNAME has $recent_bans IP bans today - potential attack in progress"
         fi
@@ -123,7 +134,8 @@ check_intrusion_detection() {
 
 check_file_integrity() {
     if [ -f "/var/lib/aide/aide.db" ]; then
-        local aide_output=$(aide --check 2>&1)
+        local aide_output
+        aide_output=$(aide --check 2>&1)
         if echo "$aide_output" | grep -q "found differences"; then
             send_alert "Security Alert: File Integrity Violation" "Host: $HOSTNAME AIDE detected unauthorized file changes"
         fi
@@ -133,7 +145,8 @@ check_file_integrity() {
 check_vulnerability_scan_results() {
     local vuln_log="/var/log/vulnerability-scan.log"
     if [ -f "$vuln_log" ]; then
-        local critical_vulns=$(grep -i "critical\|high" "$vuln_log" | wc -l)
+        local critical_vulns
+        critical_vulns=$(grep -i "critical\|high" "$vuln_log" | wc -l)
         if [ "$critical_vulns" -gt 0 ]; then
             send_alert "Security Alert: Critical Vulnerabilities Found" "Host: $HOSTNAME has $critical_vulns critical/high severity vulnerabilities"
         fi

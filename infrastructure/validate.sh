@@ -37,12 +37,13 @@ OVERALL_STATUS=0
 # ============================================================================
 echo "[1/6] Checking required tools..."
 
-REQUIRED_TOOLS=("terraform" "kubectl" "ansible" "yamllint" "ansible-lint" "docker" "docker" "compose")
-OPTIONAL_TOOLS=("kubeval" "tflint" "trivy")
+REQUIRED_TOOLS=("terraform" "kubectl" "ansible" "yamllint" "ansible-lint")
+OPTIONAL_TOOLS=("kubeconform" "tflint" "trivy")
 
-for tool in "terraform" "kubectl" "ansible" "yamllint" "ansible-lint"; do
+for tool in "${REQUIRED_TOOLS[@]}"; do
     if command_exists "$tool"; then
-        version=$($tool --version 2>&1 | head -n1)
+        # `|| true`: head closes the pipe early and newer ansible-core exits non-zero on SIGPIPE
+        version=$($tool --version 2>&1 | head -n1 || true)
         print_status 0 "$tool: $version"
     else
         print_status 1 "$tool NOT installed"
@@ -118,10 +119,23 @@ else
     print_warn "YAML lint warnings (see /tmp/k8s_yamllint.log)"
 fi
 
-if kubectl apply --dry-run=client -f base/ > /tmp/k8s_dryrun.log 2>&1; then
-    print_status 0 "Kubernetes dry-run passed"
+if kubectl kustomize base > /tmp/k8s_base.yaml 2> /tmp/k8s_kustomize.log; then
+    print_status 0 "Kustomize build: base"
+    # Offline schema validation (kubectl apply --dry-run needs a reachable API server).
+    if command_exists "kubeconform"; then
+        if kubeconform -strict -summary -ignore-missing-schemas -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            /tmp/k8s_base.yaml > /tmp/k8s_kubeconform.log 2>&1; then
+            print_status 0 "Kubernetes schema validation passed"
+        else
+            print_status 1 "Kubernetes schema validation failed (see /tmp/k8s_kubeconform.log)"
+            OVERALL_STATUS=1
+        fi
+    else
+        print_warn "kubeconform not installed - skipping schema validation"
+    fi
 else
-    print_status 1 "Kubernetes dry-run failed (see /tmp/k8s_dryrun.log)"
+    print_status 1 "Kustomize build failed: base (see /tmp/k8s_kustomize.log)"
     OVERALL_STATUS=1
 fi
 
@@ -175,14 +189,20 @@ echo ""
 echo "[5/6] Validating Docker Compose..."
 
 if command_exists "docker" && docker compose version >/dev/null 2>&1; then
-    if docker compose config --quiet > /tmp/compose_validate.log 2>&1; then
+    # The compose file requires secrets via ${VAR:?}; fall back to the example values.
+    COMPOSE_ENV_FILE=".env"
+    if [ ! -f "$COMPOSE_ENV_FILE" ]; then
+        COMPOSE_ENV_FILE=".env.example"
+        print_warn ".env not found - validating Compose with .env.example"
+    fi
+    if docker compose --env-file "$COMPOSE_ENV_FILE" config --quiet > /tmp/compose_validate.log 2>&1; then
         print_status 0 "docker-compose.yml is valid"
     else
         print_status 1 "docker-compose.yml has errors (see /tmp/compose_validate.log)"
         OVERALL_STATUS=1
     fi
 
-    if docker compose -f docker-compose.yml -f docker-compose.override.yml config --quiet > /tmp/compose_override_validate.log 2>&1; then
+    if docker compose --env-file "$COMPOSE_ENV_FILE" -f docker-compose.yml -f docker-compose.override.yml config --quiet > /tmp/compose_override_validate.log 2>&1; then
         print_status 0 "docker-compose.override.yml is valid"
     else
         print_status 1 "docker-compose.override.yml has errors"

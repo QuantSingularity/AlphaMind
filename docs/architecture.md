@@ -4,7 +4,7 @@ AlphaMind is a tiered system: two client applications, one backend service, and 
 
 ## High-level view
 
-```
+```text
 ┌─────────────────────┐     ┌─────────────────────┐
 │   web-frontend      │     │   mobile-frontend   │
 │ React + TS + Vite   │     │ React Native + Expo │
@@ -36,7 +36,7 @@ The FastAPI application lives in `code/backend/app`. Routers under `app/api/v1/r
 
 Request flow:
 
-```
+```text
 client → router (/api/v1/...) → service class → (seeded data | live connector | DB | ai_models) → JSON
 ```
 

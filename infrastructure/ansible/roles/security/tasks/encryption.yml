@@ -1,0 +1,44 @@
+---
+# Data encryption at rest and TLS policy.
+# Included from main.yml when enable_encryption is true. This only checks and prepares:
+# it never re-encrypts existing volumes (that risks data loss on a running host).
+
+- name: Install disk encryption tooling
+  ansible.builtin.package:
+    name: cryptsetup
+    state: present
+
+- name: Ensure the security configuration directory exists
+  ansible.builtin.file:
+    path: /etc/security
+    state: directory
+    owner: root
+    group: root
+
+- name: Detect encrypted block devices
+  ansible.builtin.command: lsblk --noheadings --raw --output TYPE
+  register: block_device_types
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Warn when no encrypted volume is attached
+  ansible.builtin.debug:
+    msg: >-
+      No dm-crypt volume found on {{ inventory_hostname }}. Make sure data volumes
+      are encrypted at the storage layer (for example EBS encryption) to meet the
+      encryption-at-rest requirement.
+  when: "'crypt' not in block_device_types.stdout_lines"
+
+- name: Publish the TLS and database encryption policy for applications
+  ansible.builtin.copy:
+    dest: /etc/security/tls-policy.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Managed by Ansible (security role); local changes will be overwritten.
+      protocols = {{ ssl_protocols }}
+      ciphers = {{ ssl_cipher_suite }}
+      database_ssl_required = {{ db_ssl_required | lower }}
+      database_encryption_at_rest = {{ db_encryption_at_rest | lower }}

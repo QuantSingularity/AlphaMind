@@ -32,7 +32,7 @@ AlphaMind demonstrates an institutional-style quant workflow across a real, runn
 
 ## Project Structure
 
-```
+```text
 AlphaMind/
 ├── code/
 │   ├── backend/            # FastAPI service: API, auth, services, DB, infra
@@ -109,7 +109,7 @@ AlphaMind/
 
 AlphaMind is organized in tiers rather than a sprawl of microservices:
 
-```
+```text
 Clients
   ├── web-frontend (React/TS)            ── HTTP/JSON ──┐
   └── mobile-frontend (React Native)     ── HTTP/JSON ──┤
@@ -213,15 +213,17 @@ The backend suite includes contract tests (`tests/test_frontend_contracts.py`) t
 
 ## CI/CD Pipeline
 
-GitHub Actions (`.github/workflows/cicd.yml`) runs five jobs on push, pull request, and manual dispatch:
+GitHub Actions (`.github/workflows/cicd.yml`) runs seven jobs on push, pull request, and manual dispatch:
 
-| Job                          | Depends on          | What it does                                                                                          |
-| :--------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------- |
-| Code Quality Checks          | -                   | Python formatter checks and a repository-wide Prettier check                                          |
-| Backend Tests                | Code Quality Checks | Runs the pytest suite, a dedicated frontend/backend contract-test step, and uploads a coverage report |
-| Backend Build                | Backend Tests       | Builds the backend Docker image with Buildx and uploads it as an artifact                             |
-| Web-Frontend Test & Build    | Code Quality Checks | Runs the Vitest suite and produces the production web build                                           |
-| Mobile-Frontend Test & Build | Code Quality Checks | Runs the Jest suite and produces the Expo web export                                                  |
+| Job                          | Depends on          | What it does                                                                                                                                                                                                                                                                                                 |
+| :--------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code Quality Checks          | -                   | Python formatter checks and a repository-wide Prettier check                                                                                                                                                                                                                                                 |
+| Backend Test & Build         | Code Quality Checks | Runs the pytest suite, a dedicated frontend/backend contract-test step, and uploads a coverage report, then builds the backend Docker image with Buildx and uploads it as an artifact                                                                                                                        |
+| Web-Frontend Test & Build    | Code Quality Checks | Runs the Vitest suite and produces the production web build                                                                                                                                                                                                                                                  |
+| Mobile-Frontend Test & Build | Code Quality Checks | Runs the Jest suite and produces the Expo web export                                                                                                                                                                                                                                                         |
+| Docs Validation              | Code Quality Checks | Lints the Markdown docs, checks internal links, validates the code samples, and checks `docs/CLI.md` against `scripts/`                                                                                                                                                                                      |
+| Infrastructure Validation    | Code Quality Checks | Terraform fmt/validate/TFLint and toggle wiring; Kubernetes base and all environment overlays (kustomize + kubeconform + semantic checks); Ansible syntax, host matching, role template/include references and rendered templates; Docker Compose, Dockerfile lint, frontend image build, and a secrets scan |
+| Scripts Validation           | Code Quality Checks | ShellCheck, syntax and shebang checks on every tracked shell script, and a `--help` smoke test for the CLI scripts                                                                                                                                                                                           |
 
 ## Documentation
 

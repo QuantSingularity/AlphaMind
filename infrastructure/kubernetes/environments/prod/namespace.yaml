@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alphamind-prod
+  labels:
+    name: alphamind-prod
+    environment: production
+    app.kubernetes.io/part-of: alphamind-platform

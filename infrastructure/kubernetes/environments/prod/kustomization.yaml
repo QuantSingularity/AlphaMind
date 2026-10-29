@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - namespace.yaml
 
 namespace: alphamind-prod
 
@@ -26,9 +27,6 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 4
-      - op: replace
-        path: /spec/template/spec/containers/0/env/1/value
-        value: production
   - target:
       kind: Ingress
       name: alphamind-ingress
@@ -59,3 +57,28 @@ patches:
       - op: replace
         path: /spec/maxReplicas
         value: 16
+  - target:
+      kind: ConfigMap
+      name: alphamind-config
+    patch: |-
+      - op: replace
+        path: /data/API_URL
+        value: http://prod-alphamind-backend
+      - op: replace
+        path: /data/REDIS_HOST
+        value: prod-alphamind-redis
+      - op: replace
+        path: /data/DATABASE_HOST
+        value: prod-alphamind-database
+      - op: replace
+        path: /data/ALLOWED_ORIGINS
+        value: https://alphamind.example.com
+  - target:
+      kind: Role
+      name: alphamind-developer-role
+    patch: |-
+      $patch: delete
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: alphamind-developer-role

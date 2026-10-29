@@ -48,4 +48,4 @@ An honest status of what exists in this repository. Three states are used:
 | Kubernetes manifests (base, environments)                           | Infrastructure | `infrastructure/kubernetes`             |
 | Terraform modules (compute, database, monitoring, security, config) | Infrastructure | `infrastructure/terraform`              |
 | Ansible (inventory, playbooks, roles)                               | Infrastructure | `infrastructure/ansible`                |
-| GitHub Actions CI (4 jobs)                                          | Implemented    | `.github/workflows/cicd.yml`            |
+| GitHub Actions CI (7 jobs)                                          | Implemented    | `.github/workflows/cicd.yml`            |

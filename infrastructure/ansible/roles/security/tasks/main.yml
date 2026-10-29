@@ -114,11 +114,13 @@
 
 - name: Initialize AIDE database
   command: aideinit
-  creates: /var/lib/aide/aide.db.new
+  args:
+    creates: /var/lib/aide/aide.db.new
 
 - name: Move AIDE database to production location
   command: mv /var/lib/aide/aide.db.new /var/lib/aide/aide.db
-  creates: /var/lib/aide/aide.db
+  args:
+    creates: /var/lib/aide/aide.db
 
 - name: Create AIDE check cron job
   cron:

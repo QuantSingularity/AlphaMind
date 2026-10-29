@@ -1,0 +1,13 @@
+# Managed by Ansible (security role); local changes will be overwritten.
+# Rotate weekly and keep {{ audit_log_retention_days }} days of history.
+weekly
+rotate {{ ((audit_log_retention_days | int) / 7) | round(0, 'ceil') | int }}
+create
+dateext
+compress
+delaycompress
+su root adm
+
+include /etc/logrotate.d
+
+# wtmp/btmp are rotated by /etc/logrotate.d/{wtmp,btmp} on Debian/Ubuntu.

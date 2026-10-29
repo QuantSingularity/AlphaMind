@@ -1,0 +1,17 @@
+# Managed by Ansible (security role); local changes will be overwritten.
+# Retention for the compliance tooling logs ({{ audit_log_retention_days }} days).
+# System logs (auth.log, syslog, ...) are rotated by /etc/logrotate.d/rsyslog.
+/var/log/compliance-monitor.log
+/var/log/vulnerability-scan.log
+{
+    daily
+    su root adm
+    rotate {{ audit_log_retention_days }}
+    maxsize {{ audit_log_max_size }}
+    missingok
+    notifempty
+    compress
+    delaycompress
+    dateext
+    create 0640 root adm
+}

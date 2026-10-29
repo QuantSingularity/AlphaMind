@@ -1,0 +1,10 @@
+# Python tooling pinned for the "Infrastructure Validation" job in
+# .github/workflows/cicd.yml. Update the versions here, in one place.
+#
+# ansible-core 2.20+ needs Python 3.12; 2.19 is the newest release that runs on the
+# Python 3.11 used by every other job in the workflow.
+ansible-core==2.19.14
+ansible-lint==26.10.1
+yamllint==1.38.0
+PyYAML==6.0.3
+shellcheck-py==0.11.0.1

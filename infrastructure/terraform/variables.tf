@@ -282,31 +282,31 @@ variable "default_tags" {
 
 # Security Standards Configuration
 variable "enable_pci_dss_compliance" {
-  description = "Enable PCI DSS compliance features"
+  description = "Tag resources Compliance:PCI-DSS and subscribe Security Hub to the PCI DSS standard"
   type        = bool
   default     = true
 }
 
 variable "enable_gdpr_compliance" {
-  description = "Enable GDPR compliance features"
+  description = "Tag resources Compliance:GDPR"
   type        = bool
   default     = true
 }
 
 variable "enable_sox_compliance" {
-  description = "Enable SOX compliance features"
+  description = "Tag resources Compliance:SOX"
   type        = bool
   default     = true
 }
 
 variable "enable_nist_csf_compliance" {
-  description = "Enable NIST CSF compliance features"
+  description = "Tag resources Compliance:NIST-CSF"
   type        = bool
   default     = true
 }
 
 variable "enable_iso27001_compliance" {
-  description = "Enable ISO 27001 compliance features"
+  description = "Tag resources Compliance:ISO-27001"
   type        = bool
   default     = true
 }
@@ -338,31 +338,31 @@ variable "compliance_officer_email" {
 
 # Network Security Configuration
 variable "enable_vpc_flow_logs" {
-  description = "Enable VPC Flow Logs for network monitoring"
+  description = "Create VPC Flow Logs in the network module"
   type        = bool
   default     = true
 }
 
 variable "enable_guardduty" {
-  description = "Enable AWS GuardDuty for threat detection"
+  description = "Create the GuardDuty module (threat detection)"
   type        = bool
   default     = true
 }
 
 variable "enable_config" {
-  description = "Enable AWS Config for compliance monitoring"
+  description = "Create the AWS Config module (compliance recording; Security Hub standards rely on it)"
   type        = bool
   default     = true
 }
 
 variable "enable_cloudtrail" {
-  description = "Enable AWS CloudTrail for audit logging"
+  description = "Create the CloudTrail module (audit logging)"
   type        = bool
   default     = true
 }
 
 variable "enable_security_hub" {
-  description = "Enable AWS Security Hub for centralized security findings"
+  description = "Create the Security Hub module (centralized findings; keep enable_config true for control results)"
   type        = bool
   default     = true
 }

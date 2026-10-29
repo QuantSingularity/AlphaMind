@@ -1,0 +1,62 @@
+#!/bin/bash
+# Managed by Ansible (security role); local changes will be overwritten.
+# Lightweight host vulnerability checks. Findings are appended to the log read by
+# compliance-monitor.sh (lines containing CRITICAL or HIGH raise an alert).
+set -uo pipefail
+
+LOG_FILE="/var/log/vulnerability-scan.log"
+ALERT_EMAIL="{{ vuln_scan_email | default('security@company.com') }}"
+HOST_NAME=$(hostname -f 2>/dev/null || hostname)
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+FINDINGS=0
+
+log() {
+    echo "[${TIMESTAMP}] $1" >> "$LOG_FILE"
+}
+
+finding() {
+    FINDINGS=$((FINDINGS + 1))
+    log "$1: $2"
+}
+
+log "Starting vulnerability scan on ${HOST_NAME}"
+
+# 1. Pending security updates
+pending=$(apt-get -s upgrade 2>/dev/null | grep -c '^Inst .*-security' || true)
+if [ "$pending" -gt 0 ]; then
+    finding "HIGH" "${pending} pending security updates"
+fi
+
+# 2. Accounts with an empty password
+empty_accounts=$(awk -F: '($2 == "") {print $1}' /etc/shadow)
+if [ -n "$empty_accounts" ]; then
+    finding "CRITICAL" "accounts with an empty password: $(echo "$empty_accounts" | tr '\n' ' ')"
+fi
+
+# 3. SSH root login
+if sshd -T 2>/dev/null | grep -qi '^permitrootlogin yes'; then
+    finding "HIGH" "SSH permits root login"
+fi
+
+# 4. World-writable files under /etc
+writable=$(find /etc -xdev -type f -perm -0002 2>/dev/null | head -n 20)
+if [ -n "$writable" ]; then
+    finding "HIGH" "world-writable files in /etc: $(echo "$writable" | tr '\n' ' ')"
+fi
+
+# 5. Malware in common drop locations (clamscan: 0 = clean, 1 = infected, 2 = error)
+if command -v clamscan > /dev/null 2>&1; then
+    infected=$(clamscan -r -i --no-summary /tmp /var/tmp 2>/dev/null)
+    scan_status=$?
+    if [ "$scan_status" -eq 1 ]; then
+        finding "CRITICAL" "malware detected: $(echo "$infected" | tr '\n' ' ')"
+    elif [ "$scan_status" -ne 0 ]; then
+        log "WARNING: clamscan failed with status ${scan_status}"
+    fi
+fi
+
+log "Scan finished with ${FINDINGS} finding(s)"
+
+if [ "$FINDINGS" -gt 0 ]; then
+    tail -n "$((FINDINGS + 2))" "$LOG_FILE" | mail -s "Vulnerability scan: ${FINDINGS} finding(s) on ${HOST_NAME}" "$ALERT_EMAIL" || true
+fi

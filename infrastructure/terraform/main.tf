@@ -32,11 +32,11 @@ provider "aws" {
 
   default_tags {
     tags = merge(var.default_tags, {
-      "Compliance:PCI-DSS"   = "true"
-      "Compliance:GDPR"      = "true"
-      "Compliance:SOX"       = "true"
-      "Compliance:NIST-CSF"  = "true"
-      "Compliance:ISO-27001" = "true"
+      "Compliance:PCI-DSS"   = tostring(var.enable_pci_dss_compliance)
+      "Compliance:GDPR"      = tostring(var.enable_gdpr_compliance)
+      "Compliance:SOX"       = tostring(var.enable_sox_compliance)
+      "Compliance:NIST-CSF"  = tostring(var.enable_nist_csf_compliance)
+      "Compliance:ISO-27001" = tostring(var.enable_iso27001_compliance)
       "DataClassification"   = "Financial"
       "BackupRequired"       = "true"
       "MonitoringRequired"   = "true"
@@ -108,6 +108,7 @@ resource "aws_kms_alias" "main" {
 
 module "cloudtrail" {
   source = "./modules/cloudtrail"
+  count  = var.enable_cloudtrail ? 1 : 0
 
   environment                   = var.environment
   app_name                      = var.app_name
@@ -123,6 +124,7 @@ module "cloudtrail" {
 
 module "config" {
   source = "./modules/config"
+  count  = var.enable_config ? 1 : 0
 
   environment = var.environment
   app_name    = var.app_name
@@ -133,6 +135,7 @@ module "config" {
 
 module "guardduty" {
   source = "./modules/guardduty"
+  count  = var.enable_guardduty ? 1 : 0
 
   environment = var.environment
   app_name    = var.app_name
@@ -144,12 +147,13 @@ module "guardduty" {
 
 module "security_hub" {
   source = "./modules/security_hub"
+  count  = var.enable_security_hub ? 1 : 0
 
   environment = var.environment
   app_name    = var.app_name
 
   enable_aws_foundational_standard = true
-  enable_pci_dss_standard          = true
+  enable_pci_dss_standard          = var.enable_pci_dss_compliance
   enable_cis_standard              = true
 }
 
@@ -165,7 +169,7 @@ module "network" {
   database_subnet_cidrs = var.database_subnet_cidrs
   kms_key_id            = aws_kms_key.main.arn
 
-  enable_vpc_flow_logs = true
+  enable_vpc_flow_logs = var.enable_vpc_flow_logs
   enable_dns_hostnames = true
   enable_dns_support   = true
   enable_nat_gateway   = true
@@ -265,9 +269,9 @@ module "monitoring" {
   app_name    = var.app_name
   kms_key_id  = aws_kms_key.main.arn
 
-  log_retention_days    = var.log_retention_days
-  alert_email_addresses = var.alert_email_addresses
-  asg_arn               = module.compute.asg_arn
+  log_retention_days     = var.log_retention_days
+  alert_email_addresses  = var.alert_email_addresses
+  asg_arn                = module.compute.asg_arn
   db_instance_identifier = module.database.db_instance_identifier
 
   depends_on = [module.compute, module.database, aws_kms_key.main]
