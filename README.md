@@ -35,32 +35,32 @@ AlphaMind demonstrates an institutional-style quant workflow across a real, runn
 ```text
 AlphaMind/
 ├── code/
-│   ├── backend/            # FastAPI service: API, auth, services, DB, infra
-│   │   ├── app/            # FastAPI app, routers (v1 API), services
-│   │   ├── analytics/      # Alpha research, A/B testing, model validation, viz
-│   │   ├── core/           # Config and exceptions
-│   │   ├── data_processing/# Caching, monitoring, parallel, pipeline, streaming
-│   │   ├── db/             # SQLAlchemy models, repositories, session
-│   │   ├── execution/      # Liquidity forecasting, market impact, routing, OMS
-│   │   ├── infrastructure/ # Auth system (bcrypt + JWT)
-│   │   ├── market_data/    # Connectors, live feed, backtesting, exchange API
-│   │   ├── risk/           # Bayesian VaR, stress testing, controls, counterparty
-│   │   ├── tests/          # Backend test suite
-│   │   ├── alembic/        # Database migrations
+│   ├── backend/                # FastAPI service: API, auth, services, DB, infra
+│   │   ├── app/                # FastAPI app, routers (v1 API), services
+│   │   ├── analytics/          # Alpha research, A/B testing, model validation, viz
+│   │   ├── core/               # Config and exceptions
+│   │   ├── data_processing/    # Caching, monitoring, parallel, pipeline, streaming
+│   │   ├── db/                 # SQLAlchemy models, repositories, session
+│   │   ├── execution/          # Liquidity forecasting, market impact, routing, OMS
+│   │   ├── infrastructure/     # Auth system (bcrypt + JWT)
+│   │   ├── market_data/        # Connectors, live feed, backtesting, exchange API
+│   │   ├── risk/               # Bayesian VaR, stress testing, controls, counterparty
+│   │   ├── tests/              # Backend test suite
+│   │   ├── alembic/            # Database migrations
 │   │   ├── docker-compose.yml
 │   │   └── requirements.txt
-│   └── ai_models/          # Research ML library
-│       ├── agents/         # DDPG, PPO, replay buffer
-│       ├── environments/   # Trading and portfolio Gym environments
-│       ├── forecasting/    # Transformer, attention, multi-horizon models
-│       ├── generative/     # GAN, generator, discriminator, regime models
-│       ├── research/       # Factor, alpha decay, regime, execution studies
-│       └── examples/       # Runnable usage examples per module
-├── web-frontend/           # React + TypeScript + Vite dashboard
-├── mobile-frontend/        # React Native + Expo app
-├── infrastructure/         # Docker, Kubernetes, Terraform, Ansible
-├── scripts/                # Build, test, deploy, and dev helper scripts
-├── docs/                   # Documentation (this directory)
+│   └── ai_models/              # Research ML library
+│       ├── agents/             # DDPG, PPO, replay buffer
+│       ├── environments/       # Trading and portfolio Gym environments
+│       ├── forecasting/        # Transformer, attention, multi-horizon models
+│       ├── generative/         # GAN, generator, discriminator, regime models
+│       ├── research/           # Factor, alpha decay, regime, execution studies
+│       └── examples/           # Runnable usage examples per module
+├── web-frontend/               # React + TypeScript + Vite dashboard
+├── mobile-frontend/            # React Native + Expo app
+├── infrastructure/             # Docker, Kubernetes, Terraform, Ansible
+├── scripts/                    # Build, test, deploy, and dev helper scripts
+├── docs/                       # Documentation (this directory)
 └── README.md
 ```
 

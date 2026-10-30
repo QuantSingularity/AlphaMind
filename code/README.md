@@ -38,72 +38,72 @@ AlphaMind is a comprehensive quantitative trading platform engineered for instit
 
 ```
 code/
-├── ai_models/                      # Artificial Intelligence and Machine Learning Models
-│   ├── attention_mechanism.py      # Multi-head attention for time series
-│   ├── ddpg_trading.py            # Deep Deterministic Policy Gradient trading agent
-│   ├── generative_finance.py      # GAN-based synthetic data generation
-│   ├── reinforcement_learning.py  # PPO-based portfolio optimization
-│   ├── transformer_timeseries/    # Transformer models for forecasting
-│   ├── examples/                  # Usage examples and tutorials
-│   ├── research/                  # Research notebooks
-│   └── tests/                     # Model validation tests
+├── ai_models/                        # Artificial Intelligence and Machine Learning Models
+│   ├── attention_mechanism.py        # Multi-head attention for time series
+│   ├── ddpg_trading.py               # Deep Deterministic Policy Gradient trading agent
+│   ├── generative_finance.py         # GAN-based synthetic data generation
+│   ├── reinforcement_learning.py     # PPO-based portfolio optimization
+│   ├── transformer_timeseries/       # Transformer models for forecasting
+│   ├── examples/                     # Usage examples and tutorials
+│   ├── research/                     # Research notebooks
+│   └── tests/                        # Model validation tests
 │
-└── backend/                        # Core Backend Infrastructure
-    ├── app/                        # FastAPI Application Layer
-    │   ├── api/v1/routers/        # REST API endpoints
-    │   ├── main.py                # Application entry point
-    │   ├── schemas/               # Pydantic data models
-    │   └── services/              # Business logic services
+└── backend/                          # Core Backend Infrastructure
+    ├── app/                          # FastAPI Application Layer
+    │   ├── api/v1/routers/           # REST API endpoints
+    │   ├── main.py                   # Application entry point
+    │   ├── schemas/                  # Pydantic data models
+    │   └── services/                 # Business logic services
     │
-    ├── core/                       # Domain Primitives
-    │   ├── config.py              # Configuration management
-    │   ├── exceptions.py          # Custom exception hierarchy
-    │   └── __init__.py            # MarketData, Signal, BaseModule
+    ├── core/                         # Domain Primitives
+    │   ├── config.py                 # Configuration management
+    │   ├── exceptions.py             # Custom exception hierarchy
+    │   └── __init__.py               # MarketData, Signal, BaseModule
     │
-    ├── analytics/                  # Research and Analytics
-    │   ├── ab_testing/            # Experiment framework
-    │   ├── alpha_research/        # Factor models and optimization
-    │   ├── alternative_data/      # Sentiment and satellite processing
-    │   ├── model_validation/      # Cross-validation and metrics
-    │   └── visualization/         # Dashboard components
+    ├── analytics/                    # Research and Analytics
+    │   ├── ab_testing/               # Experiment framework
+    │   ├── alpha_research/           # Factor models and optimization
+    │   ├── alternative_data/         # Sentiment and satellite processing
+    │   ├── model_validation/         # Cross-validation and metrics
+    │   └── visualization/            # Dashboard components
     │
-    ├── market_data/                # Data Acquisition Layer
-    │   ├── connectors/            # 10+ data provider integrations
-    │   ├── live_feed.py           # Real-time streaming
-    │   ├── backtesting.py         # Event-driven backtest engine
-    │   └── exchange_api.py        # Exchange connectivity
+    ├── market_data/                  # Data Acquisition Layer
+    │   ├── connectors/               # 10+ data provider integrations
+    │   ├── live_feed.py              # Real-time streaming
+    │   ├── backtesting.py            # Event-driven backtest engine
+    │   └── exchange_api.py           # Exchange connectivity
     │
-    ├── execution/                  # Order Execution Engine
-    │   ├── order_management/      # Order lifecycle management
-    │   ├── routing/               # Smart order routing
+    ├── execution/                    # Order Execution Engine
+    │   ├── order_management/         # Order lifecycle management
+    │   ├── routing/                  # Smart order routing
     │   ├── liquidity_forecasting.py
     │   └── market_impact.py
     │
-    ├── risk/                       # Risk Management System
-    │   ├── aggregation/           # Portfolio risk aggregation
-    │   ├── controls/              # Circuit breakers
-    │   ├── counterparty/          # Credit value adjustment
-    │   ├── bayesian_var.py        # Bayesian Value at Risk
+    ├── risk/                         # Risk Management System
+    │   ├── aggregation/              # Portfolio risk aggregation
+    │   ├── controls/                 # Circuit breakers
+    │   ├── counterparty/             # Credit value adjustment
+    │   ├── bayesian_var.py           # Bayesian Value at Risk
     │   └── stress_testing.py
     │
-    ├── data_processing/            # ETL and Streaming
-    │   ├── pipeline.py            # Configurable ETL pipelines
-    │   ├── streaming.py           # Stream processing
-    │   ├── caching.py             # Data caching layer
-    │   ├── parallel.py            # Parallel computation
-    │   └── monitoring.py          # Pipeline monitoring
+    ├── data_processing/              # ETL and Streaming
+    │   ├── pipeline.py               # Configurable ETL pipelines
+    │   ├── streaming.py              # Stream processing
+    │   ├── caching.py                # Data caching layer
+    │   ├── parallel.py               # Parallel computation
+    │   └── monitoring.py             # Pipeline monitoring
     │
-    ├── infrastructure/             # External Integrations
-    │   ├── auth/                  # JWT authentication
-    │   ├── cloud/gcp_vertex/      # Cloud ML pipeline orchestration
-    │   ├── messaging/kafka/       # Event streaming
-    │   └── pricing/               # QuantLib pricing models
+    ├── infrastructure/               # External Integrations
+    │   ├── auth/                     # JWT authentication
+    │   ├── cloud/gcp_vertex/         # Cloud ML pipeline orchestration
+    │   ├── messaging/kafka/          # Event streaming
+    │   └── pricing/                  # QuantLib pricing models
     │
-    └── tests/                      # Comprehensive Test Suite
-        ├── test_api.py            # API endpoint tests
-        ├── test_portfolio.py      # Portfolio management tests
-        ├── test_order_manager.py  # Order execution tests
-        └── test_*.py              # Additional test modules
+    └── tests/                        # Comprehensive Test Suite
+        ├── test_api.py               # API endpoint tests
+        ├── test_portfolio.py         # Portfolio management tests
+        ├── test_order_manager.py     # Order execution tests
+        └── test_*.py                 # Additional test modules
 ```
 
 ---
